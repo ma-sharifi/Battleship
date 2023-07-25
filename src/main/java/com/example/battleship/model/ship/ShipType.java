@@ -2,6 +2,7 @@ package com.example.battleship.model.ship;
 
 /**
  * @author Mahdi Sharifi
+ * Represent the type of ship and create an instance of ship based on our type of ship.
  */
 public enum ShipType {
     AIRCRAFT_CARRIER(5) {
