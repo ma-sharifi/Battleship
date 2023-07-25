@@ -1,0 +1,16 @@
+environement:
+  property: I AM THE DEFAULT
+
+logging:
+  level:
+    ROOT: INFO
+    com.example: DEBUG
+
+spring:
+  application:
+    name: Battleship
+
+server:
+  port: 8080
+# For the sake of simply I just provide the users.
+userlist: player1,player2

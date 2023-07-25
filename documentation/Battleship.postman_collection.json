@@ -1,0 +1,183 @@
+{
+	"info": {
+		"_postman_id": "05fa0ae8-c47f-4111-9629-2488c37a7bcf",
+		"name": "Battleship",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "3135179"
+	},
+	"item": [
+		{
+			"name": "create game",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "player1",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "password",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/v1/battleship",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"battleship"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "join game",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "player2",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "password",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n    {\n        \"shipType\": \"AIRCRAFT_CARRIER\",\n        \"direction\": \"VERTICAL\",\n        \"start\": \"I2\"\n    },\n    {\n        \"shipType\": \"DESTROYER\",\n        \"direction\": \"VERTICAL\",\n        \"start\": \"A1\"\n    },\n    {\n        \"shipType\": \"CRUISER\",\n        \"direction\": \"VERTICAL\",\n        \"start\": \"B7\"\n    },\n    {\n        \"shipType\": \"BATTLESHIP\",\n        \"direction\": \"HORIZONTAL\",\n        \"start\": \"C3\"\n    },\n    {\n        \"shipType\": \"SUBMARINE\",\n        \"direction\": \"HORIZONTAL\",\n        \"start\": \"D5\"\n    }\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/battleship/CNG-c165b087-9015-4f22-bf43-34cc1757dcf7/join",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"battleship",
+						"CNG-c165b087-9015-4f22-bf43-34cc1757dcf7",
+						"join"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "place-fleet",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "player1",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "password",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n    {\n        \"shipType\": \"AIRCRAFT_CARRIER\",\n        \"direction\": \"VERTICAL\",\n        \"start\": \"I2\"\n    },\n    {\n        \"shipType\": \"DESTROYER\",\n        \"direction\": \"VERTICAL\",\n        \"start\": \"A1\"\n    },\n    {\n        \"shipType\": \"CRUISER\",\n        \"direction\": \"VERTICAL\",\n        \"start\": \"B7\"\n    },\n    {\n        \"shipType\": \"BATTLESHIP\",\n        \"direction\": \"HORIZONTAL\",\n        \"start\": \"C3\"\n    },\n    {\n        \"shipType\": \"SUBMARINE\",\n        \"direction\": \"HORIZONTAL\",\n        \"start\": \"D5\"\n    }\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/battleship/CNG-520e5040-0a56-4807-846f-cffff4269d82/place",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"battleship",
+						"CNG-520e5040-0a56-4807-846f-cffff4269d82",
+						"place"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fire",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "player1",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "password",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "A1",
+					"options": {
+						"raw": {
+							"language": "text"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/battleship/CNG-520e5040-0a56-4807-846f-cffff4269d82/fire",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"battleship",
+						"CNG-520e5040-0a56-4807-846f-cffff4269d82",
+						"fire"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
