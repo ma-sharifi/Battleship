@@ -13,17 +13,18 @@ import java.util.LinkedList;
 public interface Util {
 
     static Ship shipDtoToShip(ShipDto shipDto) {
-        Coordinate startCoordinate = Coordinate.fromLabel(shipDto.getStart());
-        Ship ship = shipDto.getShipType().newInstance();
-        ship.setDirection(shipDto.getDirection());
+        System.out.println("#shipDto: "+shipDto);
+        Coordinate startCoordinate = new Coordinate(shipDto.start());
+        Ship ship = shipDto.type().newInstance();
+        ship.setDirection(shipDto.direction());
         LinkedList<Coordinate> coordinates = new LinkedList<>();
         ship.setCoordinates(coordinates);
-        if (shipDto.getDirection() == Direction.HORIZONTAL) {//WE CAN ADD ALL SHIP OR WE CANT ADD WHOLE OF IT
-            for (int col = startCoordinate.getColumn(); col < shipDto.getShipType().getLength() + startCoordinate.getColumn(); col++) {//-
+        if (shipDto.direction() == Direction.HORIZONTAL) {//WE CAN ADD ALL SHIP OR WE CANT ADD WHOLE OF IT
+            for (int col = startCoordinate.getColumn(); col < shipDto.type().length() + startCoordinate.getColumn(); col++) {//-
                 coordinates.add(new Coordinate(startCoordinate.getRow(), col));
             }
         } else {
-            for (int row = startCoordinate.getRow(); row < shipDto.getShipType().getLength() + startCoordinate.getRow(); row++) {//-
+            for (int row = startCoordinate.getRow(); row < shipDto.type().length() + startCoordinate.getRow(); row++) {//-
                 coordinates.add(new Coordinate(row, startCoordinate.getColumn()));
             }
         }

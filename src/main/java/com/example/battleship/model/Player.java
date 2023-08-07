@@ -1,7 +1,8 @@
 package com.example.battleship.model;
 
 import com.example.battleship.model.ship.Ship;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +11,7 @@ import java.util.Map;
  * @author Mahdi Sharifi
  * The player is the owner of his fleet and his board.
  */
-@Data
+@Getter @Setter
 public class Player {
     private int id; // 1 OR 2 . we have 2 player. player number 1 and player number 2
     private static final int BOARD_HEIGHT = 10;
@@ -18,10 +19,11 @@ public class Player {
     private Map<Character, Ship> fleet = new HashMap<>(); // The player has a fleet of ships.
     private String nextAction; //Used for control the flow of gameplay. It means placeFleet can't call before joinGame
     private Player opponent; //who is player's opponent
+    //Players keep track of their guesses and the hits or misses.
     private Cell[][] board = new Cell[BOARD_HEIGHT][BOARD_WIDTH]; // Player's field. Without players, the field does not have a concept.
 
     public void placeShip(Ship ship) {
-        fleet.put(ship.getShipType().getFirstCharacterOfType(), ship);
+        fleet.put(ship.type().id(), ship);
     }
 
     public Player opponent() {
@@ -50,4 +52,8 @@ public class Player {
         }
     }
 
+    @Override
+    public String toString() {
+        return String.valueOf(id);
+    }
 }

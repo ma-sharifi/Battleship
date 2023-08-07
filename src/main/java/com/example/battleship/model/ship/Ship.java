@@ -2,7 +2,8 @@ package com.example.battleship.model.ship;
 
 
 import com.example.battleship.model.Coordinate;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.LinkedList;
 
@@ -10,16 +11,16 @@ import java.util.LinkedList;
  * @author Mahdi Sharifi
  * It has the parent of all ships. The ship holds the information about the ship.
  */
-@Data
+@Setter @Getter //TODO
 public abstract class Ship {
-    private final Character id;// C is stand for Cruise, B is stand for Battleship
+    private final Character id;// The character C stands for cruise, and the character B stands for battleship.
     private Direction direction;
-    private final ShipType shipType;
+    private final ShipType type;
     private LinkedList<Coordinate> coordinates = new LinkedList<>(); //I used Linkedlist in order to get last and first item easily
 
-    public Ship(ShipType shipType) {
-        this.shipType = shipType;
-        this.id = shipType.getFirstCharacterOfType();
+    public Ship(ShipType type) {
+        this.type = type;
+        this.id = type.id();
     }
 
     public void shot(Coordinate coordinate) {
@@ -43,4 +44,17 @@ public abstract class Ship {
         return coordinates.stream().allMatch(Coordinate::isHit);
     }
 
+    public ShipType type(){
+        return type;
+    }
+
+    @Override
+    public String toString() {
+        return "Ship{" +
+                "id=" + id +
+//                ", direction=" + direction +
+//                ", shipType=" + type +
+//                ", coordinates=" + coordinates +
+                '}';
+    }
 }

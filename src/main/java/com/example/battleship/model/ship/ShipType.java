@@ -1,10 +1,12 @@
 package com.example.battleship.model.ship;
 
+import com.example.battleship.exception.ShipDoesNotExistException;
+
 /**
  * @author Mahdi Sharifi
  * Represent the type of ship and create an instance of ship based on our type of ship.
  */
-public enum ShipType {
+public enum ShipType implements ShipCreator {
     AIRCRAFT_CARRIER(5) {
         @Override
         public Ship newInstance() {
@@ -35,12 +37,9 @@ public enum ShipType {
         }
     };
 
-    // Create a new ship by ship type
-    public abstract Ship newInstance();
-
     private final int length;
 
-    public int getLength() {
+    public int length() {
         return length;
     }
 
@@ -48,13 +47,15 @@ public enum ShipType {
         this.length = length;
     }
 
-
-    public String getName() {
-        return name();
-    }
-
-    public Character getFirstCharacterOfType() {
+    public Character id() {
         return this.name().toUpperCase().charAt(0);
     }
 
+    public static ShipType getTypeByShipId(Character shipId){
+        for (ShipType type:ShipType.values()) {
+            if(type.id().equals(shipId))
+                return type;
+        }
+        throw new ShipDoesNotExistException(shipId+"");
+    }
 }

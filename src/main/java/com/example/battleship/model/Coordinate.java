@@ -22,6 +22,12 @@ public class Coordinate implements Comparable<Coordinate> {
         this.column = column;
     }
 
+    public Coordinate(String label) {
+        Coordinate coordinate=fromLabel(label);
+        this.row = coordinate.row;
+        this.column = coordinate.column;
+    }
+
     public boolean isSameLocation(Coordinate otherCoordinate) {
         return row == otherCoordinate.getRow() && column == otherCoordinate.column;
     }

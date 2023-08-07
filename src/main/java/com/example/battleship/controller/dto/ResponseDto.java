@@ -19,18 +19,20 @@ import java.util.Map;
 
 @Data
 @Schema(description = "Response is always a JSON for sake of uniform implementation in client side")
-@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseDto {
 
     @JsonProperty("error_code")
     private int errorCode;
-    @JsonIgnore
-    private HttpStatus httpStatus=HttpStatus.OK;
-    private String message = "Success";
-    private Object payload ;
+    private String message;
 
-    public ResponseDto(Object payload) {
-         this.payload=payload;
+    public ResponseDto(int errorCode, String message) {
+        this.errorCode = errorCode;
+        this.message = message;
+    }
+
+    public ResponseDto() {
+        this.errorCode = 0;
+        this.message = "Success";
     }
 }

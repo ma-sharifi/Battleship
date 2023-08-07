@@ -3,7 +3,6 @@ package com.example.battleship.service;
 import com.example.battleship.exception.*;
 import com.example.battleship.model.Cell;
 import com.example.battleship.model.Coordinate;
-import com.example.battleship.model.ship.Direction;
 import com.example.battleship.model.ship.Ship;
 import com.example.battleship.model.ship.ShipType;
 import org.springframework.stereotype.Service;
@@ -31,52 +30,11 @@ public class ValidatorService {
     public boolean checkShipOverlap(Cell[][] board, Ship ship) {
         ship.getCoordinates().forEach(coordinate -> {
             if (board[coordinate.getRow()][coordinate.getColumn()].isShip())
-                throw new ViolateOverlapException("Label: " + coordinate.isHit() + " ;Overlap: " + board[coordinate.getRow()][coordinate.getColumn()]);//DONT OVERLAP
+                throw new ViolateOverlapException("You are trying to place ship "+ship.type()+" with orientation "+ship.getDirection()
+                        +". In label '" + coordinate.toLabel() + "' it overlapped with ship " +
+                        ShipType.getTypeByShipId(board[coordinate.getRow()][coordinate.getColumn()].getShipId())+" that is already placed.");
         });
         return true;
-    }
-
-    /**
-     * It Checks if 2 ships have touched each other. It means that they are neighbors without any cells between.
-     */
-    public boolean checkShipDontTouchEachOther(Cell[][] cells, Ship ship) {
-        var startShipCoordinate = ship.getCoordinates().getFirst();
-        var endShipCoordinate = ship.getCoordinates().getLast();
-
-        int aboveNeighborRow = Math.max(startShipCoordinate.getRow() - 1, 0);
-        int bottomNeighborRow = Math.min(endShipCoordinate.getRow() + 1, cells[0].length - 1);
-
-        int leftNeighborCol = Math.max(startShipCoordinate.getColumn() - 1, 0);
-        int rightNeighborCol = Math.min(endShipCoordinate.getColumn() + 1, cells.length - 1);
-
-        if (ship.getDirection() == Direction.VERTICAL) {
-            //Check top and bottom cell don't touch by other ship
-            if (cells[startShipCoordinate.getRow()][leftNeighborCol].isShip() || cells[startShipCoordinate.getRow()][rightNeighborCol].isShip())
-                throw new ViolateTouchException("row: " + aboveNeighborRow + " ;col: " + leftNeighborCol + " ;Touch: " + cells[aboveNeighborRow][leftNeighborCol]);// Check the previous Col and the next col there was not ship in a vertical ship
-
-            checkLeftColumnAndRightColumnDontTouchByNewShip(cells, aboveNeighborRow, leftNeighborCol, bottomNeighborRow, rightNeighborCol);
-        } else {
-            //Check left and right cell dont touch by other ship
-            if (cells[aboveNeighborRow][startShipCoordinate.getColumn()].isShip() || cells[bottomNeighborRow][startShipCoordinate.getColumn()].isShip())
-                throw new ViolateTouchException( new Coordinate(aboveNeighborRow, startShipCoordinate.getColumn()).toLabel() + " ;Touch: " + cells[aboveNeighborRow][startShipCoordinate.getColumn()]);// Check the previous Col and the next col there was not ship in a vertical ship
-            checkAboveRowAndBottomRowDotHaveTouchWithOurShip(cells, aboveNeighborRow, leftNeighborCol, bottomNeighborRow, rightNeighborCol);
-        }
-
-        return true;
-    }
-
-    private static void checkAboveRowAndBottomRowDotHaveTouchWithOurShip(Cell[][] cells, int prevRow, int prevCol, int nextRow, int nextCol) {
-        for (int row = prevRow; row <= nextRow; row++) {
-            if (cells[row][prevCol].isShip() || cells[row][nextCol].isShip())
-                throw new ViolateTouchException( new Coordinate(row, prevCol).toLabel() + " ;Touched: " + cells[row][prevCol]);//DONT TOUCH
-        }
-    }
-
-    private static void checkLeftColumnAndRightColumnDontTouchByNewShip(Cell[][] cells, int prevRow, int prevCol, int nextRow, int nextCol) {
-        for (int col = prevCol; col <= nextCol; col++) {
-            if (cells[prevRow][col].isShip() || cells[nextRow][col].isShip())
-                throw new ViolateTouchException("row: " + prevRow + " ;col: " + col + " ;Touch: " + cells[prevRow][col]);
-        }
     }
 
     /**
@@ -85,9 +43,9 @@ public class ValidatorService {
     private void checkDuplicatedShipAdded(List<Ship> ships) {
         List<String> shipTypes = new ArrayList<>();
         for (Ship ship: ships) {
-            String shipType = ship.getShipType().getName();
+            var shipType = ship.type().id().toString();
             if (shipTypes.contains(shipType)) {
-                throw new DuplicateShipException("Duplicated ship found: "+shipType+" ;Coordinates: "+ship.getCoordinates().stream()
+                throw new DuplicateShipException(shipType+" ;Coordinates: "+ship.getCoordinates().stream()
                         .map(Coordinate::toLabel).toList());
             }
             shipTypes.add(shipType);
@@ -106,7 +64,7 @@ public class ValidatorService {
         for (Ship ship: fleet) {
             boolean isOutOfGrid = ship.getCoordinates().stream().anyMatch(this::coordinateIsOutOfBoard);
             if (isOutOfGrid) {
-                throw new OutOfBoardException(ship.getShipType().name());
+                throw new OutOfBoardException(ship.type().name());
             }
         }
 

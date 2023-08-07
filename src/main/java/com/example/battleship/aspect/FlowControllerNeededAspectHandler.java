@@ -37,17 +37,17 @@ public class FlowControllerNeededAspectHandler {
         int playerId = (int) args[1];
 
         var battleshipGame = battleshipGameCache.getIfPresent(gameId);
-        if (battleshipGame.getPlayer(playerId) == null) {
+        if (battleshipGame.playerById(playerId) == null) {
             throw new PlayerDidNotJoinException(String.valueOf(playerId));
         }
-        var expectedMethodCall = battleshipGame.getPlayer(playerId).getNextAction();
+        var expectedMethodCall = battleshipGame.playerById(playerId).getNextAction();
 
         if (!methodName.equalsIgnoreCase(expectedMethodCall)) {
             throw new ViolateGamePlayFlowException(expectedMethodCall, methodName);
         }
 
         var result = joinPoint.proceed();
-        battleshipGame.getPlayer(playerId).setNextAction("fire");//Stay in action "fire" until the game is over
+        battleshipGame.playerById(playerId).setNextAction("fire");//Stay in action "fire" until the game is over
         return result;
     }
 

@@ -1,6 +1,7 @@
 package com.example.battleship.controller;
 
 import com.example.battleship.BattleshipApplication;
+import com.example.battleship.controller.dto.GameDto;
 import com.example.battleship.controller.dto.ResponseDto;
 import com.example.battleship.controller.dto.ShipDto;
 import com.example.battleship.model.ship.Direction;
@@ -16,6 +17,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -119,7 +121,7 @@ class BattleshipGameControllerImplTest {
 
     private void joinGame(String gameId) throws Exception {
         mockMvc
-                .perform(post(API_URL + "/{game-id}/join", gameId)
+                .perform(post(API_URL + "/{game-id}/                                                                                                                                                                                  ", gameId)
                         .header("Authorization", BASIC_AUTH_PALYER1))
                 .andExpect(status().isOk());
 
@@ -129,14 +131,23 @@ class BattleshipGameControllerImplTest {
                 .andExpect(status().isOk());
     }
 
-    private static List<ShipDto> generateFleet1() {
-        List<ShipDto> fleet1 = new ArrayList<>();
-        fleet1.add(new ShipDto(ShipType.DESTROYER, Direction.HORIZONTAL, "A1"));
-        fleet1.add(new ShipDto(ShipType.AIRCRAFT_CARRIER, Direction.HORIZONTAL, "I2"));
-        fleet1.add(new ShipDto(ShipType.CRUISER, Direction.HORIZONTAL, "B7"));
-        fleet1.add(new ShipDto(ShipType.BATTLESHIP, Direction.VERTICAL, "C3"));
-        fleet1.add(new ShipDto(ShipType.SUBMARINE, Direction.VERTICAL, "D5"));
-        return fleet1;
+    private static LinkedList<ShipDto> generateFleet1() {
+        LinkedList<ShipDto> fleet = new LinkedList<>();
+        fleet.add(new ShipDto(ShipType.DESTROYER, Direction.HORIZONTAL, "A1"));
+        fleet.add(new ShipDto(ShipType.CRUISER, Direction.HORIZONTAL, "B1"));
+        fleet.add(new ShipDto(ShipType.SUBMARINE, Direction.HORIZONTAL, "C1"));
+        fleet.add(new ShipDto(ShipType.BATTLESHIP, Direction.HORIZONTAL, "D1"));
+        fleet.add(new ShipDto(ShipType.AIRCRAFT_CARRIER, Direction.HORIZONTAL, "I1"));
+        return fleet;
+    }
+    private static LinkedList<ShipDto> generateFleet4() {
+        LinkedList<ShipDto> fleet = new LinkedList<>();
+        fleet.add(new ShipDto(ShipType.DESTROYER, Direction.VERTICAL, "A1"));
+        fleet.add(new ShipDto(ShipType.CRUISER, Direction.VERTICAL, "A2"));
+        fleet.add(new ShipDto(ShipType.SUBMARINE, Direction.VERTICAL, "A3"));
+        fleet.add(new ShipDto(ShipType.BATTLESHIP, Direction.VERTICAL, "A4"));
+        fleet.add(new ShipDto(ShipType.AIRCRAFT_CARRIER, Direction.VERTICAL, "A5"));
+        return fleet;
     }
 
     private String createNewGame() throws Exception {
@@ -144,8 +155,8 @@ class BattleshipGameControllerImplTest {
                 .perform(post(API_URL)
                         .header("Authorization", BASIC_AUTH_PALYER1))
                 .andExpect(status().isCreated()).andReturn();
-        ResponseDto responseDto = new Gson().fromJson(result.getResponse().getContentAsString(), ResponseDto.class);
-        var gameId = (String) responseDto.getPayload();
+        GameDto responseDto = new Gson().fromJson(result.getResponse().getContentAsString(), GameDto.class);
+        var gameId = responseDto.getId();
 
         return gameId;
     }

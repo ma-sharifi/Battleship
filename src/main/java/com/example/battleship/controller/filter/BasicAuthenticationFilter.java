@@ -73,9 +73,9 @@ public class BasicAuthenticationFilter implements Filter {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         OutputStream responseStream = response.getOutputStream();
         var mapper = new ObjectMapper();
-        var responseDto = new ResponseDto(null);
+        var responseDto = new ResponseDto();
         responseDto.setMessage( message);
-        responseDto.setErrorCode(HttpStatus.UNAUTHORIZED.value());
+        responseDto.setErrorCode(22);
         mapper.writeValue(responseStream, responseDto);
         responseStream.flush();
     }

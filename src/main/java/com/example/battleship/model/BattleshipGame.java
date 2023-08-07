@@ -16,14 +16,14 @@ public class BattleshipGame {
     private int turn;
     private Player winner;
 
-    public Player getPlayer(int playerId) {
+    public Player playerById(int playerId) {
         if (playerId<=players.size() && playerId >0)
             return players.get(playerId-1);
         return null;
     }
 
     public void setPlayerById(int playerId,Player player) {
-        if(getPlayer(playerId)==null)
+        if(playerById(playerId)==null)
             players.add(playerId-1,player);
         else
             throw new JoinGameException(String.valueOf(playerId));
@@ -37,12 +37,24 @@ public class BattleshipGame {
         return winner!=null;
     }
 
-    public void changeTurn() {
+    /**
+     * Effective Java: Chapter 11, Item 78
+     * It is not sufficient to synchronize only the write method!
+     * Synchronization is not guaranteed to work unless both read and write operations are synchronized.
+     */
+    public synchronized int getTurn() {
+        return turn;
+    }
+
+    public synchronized void setTurn(int turn) {
+        this.turn = turn;
+    }
+
+    public synchronized void changeTurn() {
         turn = ((turn % 2) + 1);
     }
 
     public boolean isPlayerTurn(int playerId) {
         return getTurn() == playerId;
     }
-
 }

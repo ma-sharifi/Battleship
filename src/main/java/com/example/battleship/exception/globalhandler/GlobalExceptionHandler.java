@@ -22,10 +22,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = BaseException.class)
     public ResponseEntity<ResponseDto> handleBadRequestException(BaseException ex) {
-        ResponseDto responseDto = new ResponseDto(ex.getMessage());
-        responseDto.setMessage(ex.getClass().getSimpleName());
-        responseDto.setErrorCode(HttpStatus.BAD_REQUEST.value());
-        return new ResponseEntity<>(responseDto, HttpStatus.BAD_REQUEST);
+        ResponseDto responseDto = new ResponseDto(ex.getErrorCode(),ex.getMessage());
+        return new ResponseEntity<>(responseDto, ex.getHttpStatus());
     }
 
 }

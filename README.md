@@ -1,5 +1,7 @@
 ## Battleship Game
 
+Notify Opponent about his turn
+
 # Battleship Game
 Battleship Game is an assessment for AA bank.
 
@@ -58,6 +60,11 @@ All responses are provided by JSON in order to client read them uniformly. Resul
 You can find the Postman file in /documentation folder of the project.
 A player will extract from Basic authentication and will pass it to the service;
 I used POST because all these methods must change the state of the game.
+
+### responseDto
+For response we can use Zalando problems that implemented rfc7807 `Problem Details for HTTP APIs`. But for the sake of simplicity I used a simple Dto.
+
+### API explain
 >Root of our API is:  `/v1/battleship`
 1. `/`: for creating a game. The response will be:
 ```json
@@ -77,16 +84,24 @@ After successful join response will be:
 ```
 3. `/{game-id}/place`: for placing the fleet
 Request will be an array of shipDto.
+start: is the first coordinate of the ship. Since we have the length of the ship from its Type, and direction of that, we can calculate the other coordinates of a ship if we know the start coordinate of a ship.
+For example below, our ship will be place on board from A1 ,A2 ,A3 because length o CRUISER is 3, its direction is HORIZONTAL, and start point is A1.
 ```json
 [{
-    "shipType": "AIRCRAFT_CARRIER",
-    "direction": "VERTICAL",
-    "start": "I2"
-}
-]
+    "shipType": "CRUISER",
+    "direction": "HORIZONTAL",
+    "start": "A1"
+}]
 ```
-4. `/{game-id}/fire`: for shooting the opponent's ship.
-
+4. `/{game-id}/fire`: for shooting the opponent's ship. 
+Response is: 
+```json 
+   {
+   "message": "Success",
+   "result": "Hit",
+   "error_code": 0
+   }
+``` 
 ## Swagger
 You also can find the swagger ui in following link:
 >http://localhost:8080/swagger-ui/index.html

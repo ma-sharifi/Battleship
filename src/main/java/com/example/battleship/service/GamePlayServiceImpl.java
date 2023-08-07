@@ -24,7 +24,7 @@ import java.util.UUID;
 /**
  *  @author Mahdi Sharifi
  *
- *  This is an implementation of BAttleship gmaeplay
+ *  This is an implementation of Battleship Gameplay
  */
 @Service
 @Slf4j
@@ -51,7 +51,7 @@ public class GamePlayServiceImpl implements GamePlayService {
         game.setTurn(1);
         battleshipGameCache.put(game.getId(), game);
         //We can notify the player2 about this UUID by sending notification(PushNotification,Kafka,Redis,..), SMS or telling him this UUID.
-        log.info("#New game created: ", game.getId());
+        log.info("#New game created: "+ game.getId());
         return game.getId();
     }
 
@@ -66,7 +66,7 @@ public class GamePlayServiceImpl implements GamePlayService {
         //Player1/2 is already joined (Player2/1 joined after player1/2). The player1/2 is player2/1 opponent.
         game.setPlayerById(playerId, player);
         setPlayerOpponent(game, player, opponentId);
-        log.info("#Player joined: Player" + playerId);
+        log.info("#Game id: "+gameId+" ;Player joined. Player" + playerId);
     }
 
 
@@ -77,18 +77,18 @@ public class GamePlayServiceImpl implements GamePlayService {
     public void placeFleet(String gameId, int playerId, List<ShipDto> fleetDto) {
         var game = battleshipGameCache.getIfPresent(gameId);
 
-        var player = game.getPlayer(playerId);
+        var player = game.playerById(playerId);
         var cells = player.getBoard();
 
         List<Ship> fleet = fleetDto.stream().map(Util::shipDtoToShip).toList();
         validatorService.validate(fleet);
         for (Ship ship : fleet) {
-            if (validatorService.checkShipOverlap(cells, ship) && validatorService.checkShipDontTouchEachOther(cells, ship)) { //DOnt continue oif one hasproble
+            if (validatorService.checkShipOverlap(cells, ship) ) { //&& validatorService.checkShipDontTouchEachOther(cells, ship) //DOnt continue oif one hasproble
                 placeShipOnBoard(cells, ship);
                 player.placeShip(ship);
             }
         }
-        log.info("#Fleet placed. Player" + playerId);
+        log.info("#Game id: "+gameId+" ;Fleet placed. Player" + playerId);
     }
 
     /**
@@ -101,7 +101,7 @@ public class GamePlayServiceImpl implements GamePlayService {
     @GameIdNeeded
     public String fire(String gameId, int playerId, String label) { // A1
         var game = battleshipGameCache.getIfPresent(gameId);
-        var player = game.getPlayer(playerId);
+        var player = game.playerById(playerId);
         if (game.isFinished()) throw new GameAlreadyFinishedException(String.valueOf(game.getWinner().getId()));
 
         Coordinate firedCoordinate = Coordinate.fromLabel(label);//Convert the label "A1" to coordinate (row=0,col=0)
@@ -109,6 +109,7 @@ public class GamePlayServiceImpl implements GamePlayService {
         if (validatorService.coordinateIsOutOfBoard(firedCoordinate)) throw new OutOfBoardException(label);
 
         return placeShotOnBoardAndShipThenCalculateResult(game, player, firedCoordinate);
+
     }
 
     private static String placeShotOnBoardAndShipThenCalculateResult(BattleshipGame game, Player player, Coordinate firedCoordinate) {
@@ -131,26 +132,27 @@ public class GamePlayServiceImpl implements GamePlayService {
                 }
             } else result = "Hit";
         }
+        log.info("#Game id: "+game.getId()+" Player "+player+" fire at " +firedCoordinate.toLabel()+" ;result is: "+result);
         return result;
     }
 
     private void placeShipOnBoard(Cell[][] cells, Ship ship) {
-        ship.getCoordinates().forEach(coordinate -> cells[coordinate.getRow()][coordinate.getColumn()] = new Cell(ship.getShipType().getFirstCharacterOfType()));
+        ship.getCoordinates().forEach(coordinate -> cells[coordinate.getRow()][coordinate.getColumn()] = new Cell(ship.type().id()));
     }
 
     /**
      * Player2 is already joined (Player1 joined after player2). The player2 is player1 opponent.
      */
     private void setPlayerOpponent(BattleshipGame game, Player player, int opponentId) {
-        if (game.getPlayer(opponentId) != null) {
-            player.setOpponent(game.getPlayer(opponentId));//Set player2 as opponent of player1
-            game.getPlayer(opponentId).setOpponent(player);//Set player1 as opponent of player2
+        if (game.playerById(opponentId) != null) {
+            player.setOpponent(game.playerById(opponentId));//Set player2 as opponent of player1
+            game.playerById(opponentId).setOpponent(player);//Set player1 as opponent of player2
         }
     }
 
     public void printBoard(String gameId, int playerId) {
         var game = battleshipGameCache.getIfPresent(gameId);
-        boardService.printBoard(game.getPlayer(playerId));
+        boardService.printBoard(game.playerById(playerId));
     }
 
 }

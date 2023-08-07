@@ -7,7 +7,6 @@ import com.example.battleship.model.Coordinate;
 import com.example.battleship.model.ship.Direction;
 import com.example.battleship.model.ship.Ship;
 import com.example.battleship.model.ship.ShipType;
-import io.swagger.v3.oas.models.links.Link;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,18 +29,18 @@ import static org.junit.jupiter.api.Assertions.*;
 class GamePlayServiceTest {
 
     @Autowired
-    GamePlayServiceImpl gamePlayService;
+    GamePlayService gamePlayService;
 
     @Test
     void shouldReturnUUI_whenCreateNewGameIsCalled() {
-        String battleshipGame = gamePlayService.createNewGame();
+        var battleshipGame = gamePlayService.createNewGame();
         assertNotNull(battleshipGame);
     }
 
 
     @Test
     void shouldJoinGameException_whenPlayerDidnotJoinGamed() {
-        String gameId = gamePlayService.createNewGame();
+        var gameId = gamePlayService.createNewGame();
         List<ShipDto> fleet1 = generateFleet1();
 
         PlayerDidNotJoinException thrown = Assertions.assertThrows(PlayerDidNotJoinException.class, () -> {
@@ -56,7 +55,7 @@ class GamePlayServiceTest {
      */
     @Test
     void shouldPlaceShipOnBoardCorrectly_whenAddFleetIsCalled() {
-        String gameId = gamePlayService.createNewGame();
+        var gameId = gamePlayService.createNewGame();
         gamePlayService.joinGame(gameId, 1);
         gamePlayService.joinGame(gameId, 2);
         List<ShipDto> fleet1 = generateFleet1();
@@ -92,7 +91,7 @@ class GamePlayServiceTest {
     @Test
     void shouldThrowException_whenGanePlayViolated() {
 
-        String gameId = gamePlayService.createNewGame();
+        var gameId = gamePlayService.createNewGame();
 
         gamePlayService.joinGame(gameId, 1);
         gamePlayService.joinGame(gameId, 2);
@@ -106,7 +105,7 @@ class GamePlayServiceTest {
 
     @Test
     void shouldThrowNotYourTurnException_whenChangeTurnViolated() {
-        String gameId = gamePlayService.createNewGame();
+        var gameId = gamePlayService.createNewGame();
         gamePlayService.joinGame(gameId, 1);
         gamePlayService.joinGame(gameId, 2);
 
@@ -124,7 +123,7 @@ class GamePlayServiceTest {
 
     @Test
     void shouldReturnSunk_whenSheepIsSunk() {
-        String gameId = gamePlayService.createNewGame();
+        var gameId = gamePlayService.createNewGame();
 
         gamePlayService.joinGame(gameId, 1);
         gamePlayService.joinGame(gameId, 2);
@@ -147,7 +146,7 @@ class GamePlayServiceTest {
 
     @Test
     void shouldReturnWinner_whenContinueToPlayAfterAllShipSunk() {
-        String gameId = gamePlayService.createNewGame();
+        var gameId = gamePlayService.createNewGame();
 
         gamePlayService.joinGame(gameId, 1);
         gamePlayService.joinGame(gameId, 2);
@@ -158,7 +157,6 @@ class GamePlayServiceTest {
         gamePlayService.placeFleet(gameId, 1, fleet1);
         gamePlayService.placeFleet(gameId, 2, fleet2);
 
-        gamePlayService.printBoard(gameId, 1);
         gamePlayService.printBoard(gameId, 2);
 
         for (int i = 0; i < 8; i++) {
@@ -182,7 +180,7 @@ class GamePlayServiceTest {
      */
     @Test
     void shouldThrowGameAlreadyFinishedException_WhenOnePlayerWon() {//play the whole game
-        String gameId = gamePlayService.createNewGame();
+        var gameId = gamePlayService.createNewGame();
 
         gamePlayService.joinGame(gameId, 1);
         gamePlayService.joinGame(gameId, 2);
@@ -207,7 +205,7 @@ class GamePlayServiceTest {
         gamePlayService.fire(gameId, 2, "I2");
         assertTrue(gamePlayService.fire(gameId, 1, "I3").startsWith("Winner is: "));
 
-        GameAlreadyFinishedException thrown = Assertions.assertThrows(GameAlreadyFinishedException.class, () -> {
+        var thrown = Assertions.assertThrows(GameAlreadyFinishedException.class, () -> {
             gamePlayService.fire(gameId, 2, "I3");
         });
         assertTrue(thrown.getMessage().startsWith("Winner is: Player"));
@@ -216,14 +214,14 @@ class GamePlayServiceTest {
 
     @Test
     void shouldThrowDuplicateShipException_whenDuplicatedShipAddedToFleet() {
-        String gameId = gamePlayService.createNewGame();
+        var gameId = gamePlayService.createNewGame();
         gamePlayService.joinGame(gameId, 1);
         gamePlayService.joinGame(gameId, 2);
         List<ShipDto> fleet = new ArrayList<>();
         fleet.add(new ShipDto(ShipType.SUBMARINE, Direction.HORIZONTAL, "D5"));
         fleet.add(new ShipDto(ShipType.SUBMARINE, Direction.HORIZONTAL, "D9"));//Duplicate
 
-        DuplicateShipException thrown = Assertions.assertThrows(DuplicateShipException.class, () -> {
+        var thrown = Assertions.assertThrows(DuplicateShipException.class, () -> {
             gamePlayService.placeFleet(gameId, 1, fleet);
         });
         assertTrue(thrown.getMessage().startsWith("Duplicated ship found: "));
@@ -231,14 +229,14 @@ class GamePlayServiceTest {
 
     @Test
     void shoulThrowViolateNumberOfShipException_whenCheckNumberOfShipInFleetIsNot5() {
-        String gameId = gamePlayService.createNewGame();
+        var gameId = gamePlayService.createNewGame();
         gamePlayService.joinGame(gameId, 1);
         gamePlayService.joinGame(gameId, 2);
         List<ShipDto> fleetDto = new ArrayList<>();
         fleetDto.add(new ShipDto(ShipType.AIRCRAFT_CARRIER, Direction.VERTICAL, "I2"));
         fleetDto.add(new ShipDto(ShipType.DESTROYER, Direction.VERTICAL, "A1"));
 
-        ViolateNumberOfShipException thrown = Assertions.assertThrows(ViolateNumberOfShipException.class, () -> {
+        var thrown = Assertions.assertThrows(ViolateNumberOfShipException.class, () -> {
             gamePlayService.placeFleet(gameId, 1, fleetDto);
         });
         assertTrue(thrown.getMessage().startsWith("Wrong number of ships is detected!"));
@@ -248,7 +246,7 @@ class GamePlayServiceTest {
 
     @Test
     void shouldThrowEGameNotCreatedYetException_whenJoinIsCalledWithoutNewGAmeTest() {
-        GameNotCreatedYetException thrown = Assertions.assertThrows(GameNotCreatedYetException.class, () -> {
+        var thrown = Assertions.assertThrows(GameNotCreatedYetException.class, () -> {
             gamePlayService.joinGame("gameId", 1);
         });
 
@@ -258,7 +256,7 @@ class GamePlayServiceTest {
 
     @Test
     void shouldWrongCoordinateException_whenFirsIsCalleByWrongLabel() {
-        String gameId = gamePlayService.createNewGame();
+        var gameId = gamePlayService.createNewGame();
 
         gamePlayService.joinGame(gameId, 1);
         gamePlayService.joinGame(gameId, 2);
@@ -281,7 +279,7 @@ class GamePlayServiceTest {
 
     @Test
     void shouldThrowOutOfBoardException_whenFirsIsCalledWithOutOfABourdCoordination() {
-        String gameId = gamePlayService.createNewGame();
+        var gameId = gamePlayService.createNewGame();
 
         gamePlayService.joinGame(gameId, 1);
         gamePlayService.joinGame(gameId, 2);
@@ -290,7 +288,7 @@ class GamePlayServiceTest {
         fleet1.removeLast();
         fleet1.add(new ShipDto(ShipType.SUBMARINE, Direction.HORIZONTAL, "D11"));
 
-        OutOfBoardException thrown = Assertions.assertThrows(OutOfBoardException.class, () -> {
+        var thrown = Assertions.assertThrows(OutOfBoardException.class, () -> {
             gamePlayService.placeFleet(gameId, 1, fleet1);
 
         });
@@ -302,7 +300,7 @@ class GamePlayServiceTest {
 
     @Test
     void shouldThrowDuplicateShipException_whenOneShipUsed2Times() {
-        String gameId = gamePlayService.createNewGame();
+        var gameId = gamePlayService.createNewGame();
 
         gamePlayService.joinGame(gameId, 1);
         gamePlayService.joinGame(gameId, 2);
@@ -310,7 +308,7 @@ class GamePlayServiceTest {
         List<ShipDto> fleet1 = generateFleet1();
         fleet1.add(fleet1.get(0));
 
-        DuplicateShipException thrown = Assertions.assertThrows(DuplicateShipException.class, () -> {
+        var thrown = Assertions.assertThrows(DuplicateShipException.class, () -> {
             gamePlayService.placeFleet(gameId, 1, fleet1);
 
         });
@@ -320,7 +318,7 @@ class GamePlayServiceTest {
 
     @Test
     void shouldThrowDuplicateFireException_whenFirsIsCalledWithOutOfABourdCoordination() {
-        String gameId = gamePlayService.createNewGame();
+        var gameId = gamePlayService.createNewGame();
 
         gamePlayService.joinGame(gameId, 1);
         gamePlayService.joinGame(gameId, 2);
@@ -336,7 +334,7 @@ class GamePlayServiceTest {
         gamePlayService.fire(gameId, 1, "A1");
         gamePlayService.fire(gameId, 2, "A2");
 
-        DuplicateFireException thrown = Assertions.assertThrows(DuplicateFireException.class, () -> {
+        var thrown = Assertions.assertThrows(DuplicateFireException.class, () -> {
             gamePlayService.fire(gameId, 1, "A1");
 
         });
@@ -346,14 +344,14 @@ class GamePlayServiceTest {
 
     @Test
     void shouldThrowVViolateOverlapException_when2shipTouchEachother() {
-        String gameId = gamePlayService.createNewGame();
+        var gameId = gamePlayService.createNewGame();
         gamePlayService.joinGame(gameId, 1);
         gamePlayService.joinGame(gameId, 2);
         LinkedList<ShipDto> fleet = generateFleet1();
         fleet.removeLast();
         fleet.add(new ShipDto(ShipType.SUBMARINE, Direction.HORIZONTAL, "A2"));
 
-        ViolateOverlapException thrown = Assertions.assertThrows(ViolateOverlapException.class, () -> {
+        var thrown = Assertions.assertThrows(ViolateOverlapException.class, () -> {
             gamePlayService.placeFleet(gameId, 1, fleet);
         });
         assertTrue(thrown.getMessage().startsWith("Ship has overlap by another ship! "));
@@ -362,14 +360,14 @@ class GamePlayServiceTest {
 
     @Test
     void shouldThrowViolateTouchException_when2shipTouchEachother() {
-        String gameId = gamePlayService.createNewGame();
+        var gameId = gamePlayService.createNewGame();
         gamePlayService.joinGame(gameId, 1);
         gamePlayService.joinGame(gameId, 2);
         LinkedList<ShipDto> fleet = generateFleet1();
         fleet.removeLast();
         fleet.add(new ShipDto(ShipType.SUBMARINE, Direction.HORIZONTAL, "A3"));
 
-        ViolateTouchException thrown = Assertions.assertThrows(ViolateTouchException.class, () -> {
+        var thrown = Assertions.assertThrows(ViolateTouchException.class, () -> {
             gamePlayService.placeFleet(gameId, 1, fleet);
         });
         assertTrue(thrown.getMessage().startsWith("Ship is touched by another ship!"));
@@ -421,5 +419,67 @@ class GamePlayServiceTest {
         fleet1.add(new ShipDto(ShipType.BATTLESHIP, Direction.VERTICAL, "C3"));
         fleet1.add(new ShipDto(ShipType.SUBMARINE, Direction.VERTICAL, "D5"));
         return fleet1;
+    }
+
+    private static LinkedList<ShipDto> generateFleet3() {
+        LinkedList<ShipDto> fleet = new LinkedList<>();
+        fleet.add(new ShipDto(ShipType.DESTROYER, Direction.HORIZONTAL, "A1"));
+        fleet.add(new ShipDto(ShipType.CRUISER, Direction.HORIZONTAL, "B1"));
+        fleet.add(new ShipDto(ShipType.SUBMARINE, Direction.HORIZONTAL, "C1"));
+        fleet.add(new ShipDto(ShipType.BATTLESHIP, Direction.HORIZONTAL, "D1"));
+        fleet.add(new ShipDto(ShipType.AIRCRAFT_CARRIER, Direction.HORIZONTAL, "I1"));
+        return fleet;
+    }
+    private static LinkedList<ShipDto> generateFleet4() {
+        LinkedList<ShipDto> fleet = new LinkedList<>();
+        fleet.add(new ShipDto(ShipType.DESTROYER, Direction.VERTICAL, "A1"));
+        fleet.add(new ShipDto(ShipType.CRUISER, Direction.VERTICAL, "A2"));
+        fleet.add(new ShipDto(ShipType.SUBMARINE, Direction.VERTICAL, "A3"));
+        fleet.add(new ShipDto(ShipType.BATTLESHIP, Direction.VERTICAL, "A4"));
+        fleet.add(new ShipDto(ShipType.AIRCRAFT_CARRIER, Direction.VERTICAL, "A5"));
+        return fleet;
+    }
+
+    @Test
+    void shouldReturnWinner_whenContinueToPlayAfterAllShipSunk_XX() {
+        var gameId = gamePlayService.createNewGame();
+
+        gamePlayService.joinGame(gameId, 1);
+        gamePlayService.joinGame(gameId, 2);
+
+        List<ShipDto> fleet1 = generateFleet3();
+        gamePlayService.printBoard(gameId, 1);
+        List<ShipDto> fleet2 = generateFleet4();
+        gamePlayService.printBoard(gameId, 2);
+
+        gamePlayService.placeFleet(gameId, 1, fleet1);
+        System.out.println("------- PLAYER1 -------------");
+        gamePlayService.printBoard(gameId, 1);
+
+        gamePlayService.placeFleet(gameId, 2, fleet2);
+        System.out.println("------- PLAYER2 -------------");
+        gamePlayService.printBoard(gameId, 2);
+
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 10; j++) {
+                gamePlayService.fire(gameId, 1, new Coordinate(i, j).toLabel());
+                gamePlayService.fire(gameId, 2, new Coordinate(i, j).toLabel());
+            }
+        }
+        gamePlayService.fire(gameId, 1, "E1");
+        gamePlayService.fire(gameId, 2, "E1");
+        gamePlayService.fire(gameId, 1, "E2");
+        gamePlayService.fire(gameId, 2, "E2");
+        gamePlayService.fire(gameId, 1, "E3");
+        gamePlayService.fire(gameId, 2, "E3");
+        gamePlayService.fire(gameId, 1, "E4");
+        gamePlayService.fire(gameId, 2, "E4");
+
+        assertTrue( gamePlayService.fire(gameId, 1, "E5").startsWith("Winner is: "));
+
+        gamePlayService.printBoard(gameId, 1);
+        System.out.println("------- PLAYER2 -------------");
+        gamePlayService.printBoard(gameId, 2);
+
     }
 }

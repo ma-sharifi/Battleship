@@ -35,4 +35,6 @@ public interface GamePlayService {
      * If the player guessed the correct ship coordinate, it will get Hit otherwise it will get Miss.
      */
     String fire(String gameId, int playerId, String label);
+
+    void printBoard(String gameId, int playerId);
 }
