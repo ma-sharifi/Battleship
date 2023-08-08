@@ -11,14 +11,14 @@ import java.util.LinkedList;
  * @author Mahdi Sharifi
  * It has the parent of all ships. The ship holds the information about the ship.
  */
-@Setter @Getter //TODO
+@Setter @Getter
 public abstract class Ship {
     private final Character id;// The character C stands for cruise, and the character B stands for battleship.
     private Direction direction;
     private final ShipType type;
     private LinkedList<Coordinate> coordinates = new LinkedList<>(); //I used Linkedlist in order to get last and first item easily
 
-    public Ship(ShipType type) {
+     Ship(ShipType type) {
         this.type = type;
         this.id = type.id();
     }

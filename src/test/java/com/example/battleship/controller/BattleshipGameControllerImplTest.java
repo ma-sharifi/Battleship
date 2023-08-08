@@ -2,11 +2,12 @@ package com.example.battleship.controller;
 
 import com.example.battleship.BattleshipApplication;
 import com.example.battleship.controller.dto.GameDto;
-import com.example.battleship.controller.dto.ResponseDto;
 import com.example.battleship.controller.dto.ShipDto;
 import com.example.battleship.model.ship.Direction;
 import com.example.battleship.model.ship.ShipType;
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,7 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,6 +38,8 @@ class BattleshipGameControllerImplTest {
     private static final String BASIC_AUTH_PALYER2 = "Basic cGxheWVyMjpwYXNzd29yZA==";
     private static final String BASIC_AUTH_WRONG_PALYER = "Basic cGxheWVyMzpwYXNzd29yZA==";
 
+    private final static Gson GSON = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -52,7 +54,7 @@ class BattleshipGameControllerImplTest {
         mockMvc
                 .perform(post(API_URL))
                 .andExpect(status().isUnauthorized())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").value(401));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").value(22));
     }
 
     @Test
@@ -60,7 +62,7 @@ class BattleshipGameControllerImplTest {
         mockMvc
                 .perform(post(API_URL).header("Authorization", BASIC_AUTH_WRONG_PALYER))
                 .andExpect(status().isUnauthorized())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").value(401));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").value(22));
     }
 
     @Test
@@ -72,7 +74,7 @@ class BattleshipGameControllerImplTest {
 
 
     @Test
-    void shouldPalceFleet_whenPlaceFleetIsCalled() throws Exception {
+    void shouldPlaceFleet_whenPlaceFleetIsCalled() throws Exception {
 
         var gameId = createNewGame();
         joinGame(gameId);
@@ -121,7 +123,7 @@ class BattleshipGameControllerImplTest {
 
     private void joinGame(String gameId) throws Exception {
         mockMvc
-                .perform(post(API_URL + "/{game-id}/                                                                                                                                                                                  ", gameId)
+                .perform(post(API_URL + "/{game-id}/join", gameId)
                         .header("Authorization", BASIC_AUTH_PALYER1))
                 .andExpect(status().isOk());
 
@@ -140,25 +142,14 @@ class BattleshipGameControllerImplTest {
         fleet.add(new ShipDto(ShipType.AIRCRAFT_CARRIER, Direction.HORIZONTAL, "I1"));
         return fleet;
     }
-    private static LinkedList<ShipDto> generateFleet4() {
-        LinkedList<ShipDto> fleet = new LinkedList<>();
-        fleet.add(new ShipDto(ShipType.DESTROYER, Direction.VERTICAL, "A1"));
-        fleet.add(new ShipDto(ShipType.CRUISER, Direction.VERTICAL, "A2"));
-        fleet.add(new ShipDto(ShipType.SUBMARINE, Direction.VERTICAL, "A3"));
-        fleet.add(new ShipDto(ShipType.BATTLESHIP, Direction.VERTICAL, "A4"));
-        fleet.add(new ShipDto(ShipType.AIRCRAFT_CARRIER, Direction.VERTICAL, "A5"));
-        return fleet;
-    }
 
     private String createNewGame() throws Exception {
         MvcResult result = mockMvc
                 .perform(post(API_URL)
                         .header("Authorization", BASIC_AUTH_PALYER1))
                 .andExpect(status().isCreated()).andReturn();
-        GameDto responseDto = new Gson().fromJson(result.getResponse().getContentAsString(), GameDto.class);
-        var gameId = responseDto.getId();
-
-        return gameId;
+        GameDto responseDto = GSON.fromJson(result.getResponse().getContentAsString(),GameDto.class);
+        return responseDto.getGameId();
     }
 
 }

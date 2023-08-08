@@ -30,6 +30,7 @@ import java.util.UUID;
 @Slf4j
 public class GamePlayServiceImpl implements GamePlayService {
 
+    public static final String GAME_ID_IS = "#Game id: ";
     //Help us to handle multiple game at the same time.
     //It means player1,2 can play gameId X and another player1,2 can play gameId Y
     private final Cache<String, BattleshipGame> battleshipGameCache;
@@ -51,7 +52,7 @@ public class GamePlayServiceImpl implements GamePlayService {
         game.setTurn(1);
         battleshipGameCache.put(game.getId(), game);
         //We can notify the player2 about this UUID by sending notification(PushNotification,Kafka,Redis,..), SMS or telling him this UUID.
-        log.info("#New game created: "+ game.getId());
+        log.info("#New game created. Game id is: "+ game.getId());
         return game.getId();
     }
 
@@ -78,17 +79,15 @@ public class GamePlayServiceImpl implements GamePlayService {
         var game = battleshipGameCache.getIfPresent(gameId);
 
         var player = game.playerById(playerId);
-        var cells = player.getBoard();
+        var field = player.getBoard();
 
         List<Ship> fleet = fleetDto.stream().map(Util::shipDtoToShip).toList();
         validatorService.validate(fleet);
         for (Ship ship : fleet) {
-            if (validatorService.checkShipOverlap(cells, ship) ) { //&& validatorService.checkShipDontTouchEachOther(cells, ship) //DOnt continue oif one hasproble
-                placeShipOnBoard(cells, ship);
+                placeShipOnBoard(field, ship);
                 player.placeShip(ship);
-            }
         }
-        log.info("#Game id: "+gameId+" ;Fleet placed. Player" + playerId);
+        log.info(GAME_ID_IS +gameId+" ;Fleet placed. Player" + playerId);
     }
 
     /**
@@ -109,7 +108,6 @@ public class GamePlayServiceImpl implements GamePlayService {
         if (validatorService.coordinateIsOutOfBoard(firedCoordinate)) throw new OutOfBoardException(label);
 
         return placeShotOnBoardAndShipThenCalculateResult(game, player, firedCoordinate);
-
     }
 
     private static String placeShotOnBoardAndShipThenCalculateResult(BattleshipGame game, Player player, Coordinate firedCoordinate) {

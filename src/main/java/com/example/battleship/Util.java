@@ -13,7 +13,6 @@ import java.util.LinkedList;
 public interface Util {
 
     static Ship shipDtoToShip(ShipDto shipDto) {
-        System.out.println("#shipDto: "+shipDto);
         Coordinate startCoordinate = new Coordinate(shipDto.start());
         Ship ship = shipDto.type().newInstance();
         ship.setDirection(shipDto.direction());

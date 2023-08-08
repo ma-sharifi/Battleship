@@ -48,9 +48,9 @@ by numbers and leTers (e.g., A1, B2, C3, etc.).
 Created a standalone java application that allows **users** to play together this game.
 Used Java 17, Spring Boot 3, and Maven to implement this assignment.
 
-Implemented GamePlayService for handling gameplay. I defined following method for it.
-1. createNewGame: Use for creating game. It will return a UUID as game id. After player create the game, it must share the gameId with another player. 
-2. joinGame: Users must join the game then they can play. The only 2 players (player1 and player2) can join the game. This method creates players and assigns their opponent;
+Implemented GamePlayService for handling gameplay. I defined the following method for it.
+1. createNewGame: Use for creating game. It will return a UUID as game id. After player creates the game, it must share the gameId with another player. 
+2. joinGame: Users must join the game then they can play. only 2 players (player1 and player2) can join the game. This method creates players and assigns their opponent;
 3. placeFleet: It placed ships on the board based on 3 fields of shipDto.
 4. fire: The player guesses the location of the opponent's ship, then shoots it by presenting a label like A1. If the player guessed the correct ship coordinate, it will get Hit otherwise it will get Miss.
 
@@ -62,15 +62,17 @@ A player will extract from Basic authentication and will pass it to the service;
 I used POST because all these methods must change the state of the game.
 
 ### responseDto
-For response we can use Zalando problems that implemented rfc7807 `Problem Details for HTTP APIs`. But for the sake of simplicity I used a simple Dto.
-
+For response we can use Zalando problems that implemented rfc7807 `Problem Details for HTTP APIs`. But for the sake of simplicity, I used a simple Dto.
+* error_code: is low-level error code. error_code=0 means success, otherwise means error. As a third party you can override it and use it for internal custom messaging. On another hand, you can change the message of error code 1 to every message you want.
+* If you are using this API as a client app, you can show this message to your customer.
+* Based on API call, you will get different field as a result. 
 ### API explain
 >Root of our API is:  `/v1/battleship`
 1. `/`: for creating a game. The response will be:
 ```json
 {
     "message": "Success",
-    "payload": "CNG-c165b087-9015-4f22-bf43-34cc1757dcf7",
+    "game_id": "CNG-c165b087-9015-4f22-bf43-34cc1757dcf7",
     "error_code": 0
 }
 ```
@@ -116,10 +118,9 @@ If a user does not provide an authorization header he will get the following err
 ```json
 {
     "message": "Missing or invalid Authorization header!",
-    "error_code": 401
+    "error_code": 22
 }
 ```
-
 
 ### Objects
 
@@ -170,8 +171,9 @@ A fleet is a group of ships.
 If all ships in the fleet sunk, it means the opponent is won.
 
 #### ShipDto
-It presents a ship just by 3 values of direction, type, and start Coordinate of it. 
+Is a record, it means it is immutable. It presents a ship just by 3 values of direction, type, and start Coordinate of it. 
 Since we know the length and direction of the ship, we can calculate the other coordinates of a ship on board.
+* String start: is a label such as A1 that represented a start coordinated of a ship.
 
 #### ShipType
 Represent the type of ship and **create an instance of ship based on our type of ship**.
@@ -212,7 +214,26 @@ It controls the flow of the gameplay. The player can't call fire before joining 
 The player just can fire his opponent after placing his fleet on board.
 
 ## Exceptions
-Defined many of them to handle exceptional situations.
+Defined many of them to handle exceptional situations. Tried to explain why this exception happened with a useful message to how to solve this message.
+
+### Example for ViolateOverlapException 
+if we placed our fleed like the following code, "A1" is the start point of a ship:
+```java
+  LinkedList<ShipDto> fleet= new LinkedList<>();
+  fleet.add(new ShipDto(ShipType.DESTROYER, Direction.HORIZONTAL, "A1"));  
+  fleet.add(new ShipDto(ShipType.CRUISER, Direction.HORIZONTAL, "A1"));   
+  fleet.add(new ShipDto(ShipType.SUBMARINE, Direction.HORIZONTAL, "A3"));  
+  fleet.add(new ShipDto(ShipType.BATTLESHIP, Direction.HORIZONTAL, "C1"));
+  fleet.add(new ShipDto(ShipType.AIRCRAFT_CARRIER, Direction.HORIZONTAL, "I1"));
+```
+For better understanding, I showed them on the picture as below:
+![overlap-touch](https://github.com/ma-sharifi/movieapi/assets/8404721/e5288466-f73f-4685-9270-d87878d8e560)
+The error message you will be faced is as follows:  
+`Ships overlapped violated! 3 coordinates overlapped!  
+Ship 'DESTROYER' is HORIZONTAL ,overlapped coordinates found: [A1, A2]  
+Ship 'CRUISER' is HORIZONTAL ,overlapped coordinates found: [A1, A2, A3]  
+Ship 'SUBMARINE' is HORIZONTAL ,overlapped coordinates found: [A3]  
+Check your fleet for overlapped ships`
 
 ## Test
 1. Service test is complete and it covers every aspect of gameplay.

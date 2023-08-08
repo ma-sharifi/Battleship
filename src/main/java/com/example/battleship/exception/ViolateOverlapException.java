@@ -7,6 +7,6 @@ import org.springframework.http.HttpStatus;
  */
 public class ViolateOverlapException extends BaseException{
     public ViolateOverlapException(String message) {
-        super("Ship has overlap by another ship! "+message,10, HttpStatus.BAD_REQUEST);
+        super("Ships overlapped violated! "+message,10, HttpStatus.BAD_REQUEST);
     }
 }

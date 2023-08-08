@@ -23,6 +23,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = BaseException.class)
     public ResponseEntity<ResponseDto> handleBadRequestException(BaseException ex) {
         ResponseDto responseDto = new ResponseDto(ex.getErrorCode(),ex.getMessage());
+        //Note: Error code is low level error code nad used for overriding message by third party
+        log.error("#Error!"+" ; code is: "+responseDto.getErrorCode()+" ;Message is: "+responseDto.getMessage());
         return new ResponseEntity<>(responseDto, ex.getHttpStatus());
     }
 

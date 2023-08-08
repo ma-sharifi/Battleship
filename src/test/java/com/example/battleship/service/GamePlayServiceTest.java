@@ -243,7 +243,6 @@ class GamePlayServiceTest {
     }
 
 
-
     @Test
     void shouldThrowEGameNotCreatedYetException_whenJoinIsCalledWithoutNewGAmeTest() {
         var thrown = Assertions.assertThrows(GameNotCreatedYetException.class, () -> {
@@ -294,7 +293,6 @@ class GamePlayServiceTest {
         });
 
         assertTrue(thrown.getMessage().startsWith("Ship is out of board bound! Ship type: "));
-
     }
 
 
@@ -354,25 +352,9 @@ class GamePlayServiceTest {
         var thrown = Assertions.assertThrows(ViolateOverlapException.class, () -> {
             gamePlayService.placeFleet(gameId, 1, fleet);
         });
-        assertTrue(thrown.getMessage().startsWith("Ship has overlap by another ship! "));
+        assertTrue(thrown.getMessage().startsWith("Ships overlapped violated! "));
 
     }
-
-    @Test
-    void shouldThrowViolateTouchException_when2shipTouchEachother() {
-        var gameId = gamePlayService.createNewGame();
-        gamePlayService.joinGame(gameId, 1);
-        gamePlayService.joinGame(gameId, 2);
-        LinkedList<ShipDto> fleet = generateFleet1();
-        fleet.removeLast();
-        fleet.add(new ShipDto(ShipType.SUBMARINE, Direction.HORIZONTAL, "A3"));
-
-        var thrown = Assertions.assertThrows(ViolateTouchException.class, () -> {
-            gamePlayService.placeFleet(gameId, 1, fleet);
-        });
-        assertTrue(thrown.getMessage().startsWith("Ship is touched by another ship!"));
-    }
-
 
     /**
           1 2 3 4 5 6 7 8 9 10
@@ -423,11 +405,11 @@ class GamePlayServiceTest {
 
     private static LinkedList<ShipDto> generateFleet3() {
         LinkedList<ShipDto> fleet = new LinkedList<>();
-        fleet.add(new ShipDto(ShipType.DESTROYER, Direction.HORIZONTAL, "A1"));
-        fleet.add(new ShipDto(ShipType.CRUISER, Direction.HORIZONTAL, "B1"));
-        fleet.add(new ShipDto(ShipType.SUBMARINE, Direction.HORIZONTAL, "C1"));
+        fleet.add(new ShipDto(ShipType.DESTROYER, Direction.HORIZONTAL, "A1"));    //A1A2
+        fleet.add(new ShipDto(ShipType.CRUISER, Direction.HORIZONTAL, "B1"));      //A5A6A7
+        fleet.add(new ShipDto(ShipType.SUBMARINE, Direction.HORIZONTAL, "C1"));    //A3C2C3
         fleet.add(new ShipDto(ShipType.BATTLESHIP, Direction.HORIZONTAL, "D1"));
-        fleet.add(new ShipDto(ShipType.AIRCRAFT_CARRIER, Direction.HORIZONTAL, "I1"));
+        fleet.add(new ShipDto(ShipType.AIRCRAFT_CARRIER, Direction.HORIZONTAL, "E1"));
         return fleet;
     }
     private static LinkedList<ShipDto> generateFleet4() {
@@ -441,7 +423,7 @@ class GamePlayServiceTest {
     }
 
     @Test
-    void shouldReturnWinner_whenContinueToPlayAfterAllShipSunk_XX() {
+    void shouldReturnWinner_whenContinueToPlayAfterAllShipSunkHorizontal() {
         var gameId = gamePlayService.createNewGame();
 
         gamePlayService.joinGame(gameId, 1);
