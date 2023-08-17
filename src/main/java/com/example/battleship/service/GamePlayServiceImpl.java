@@ -39,11 +39,9 @@ public class GamePlayServiceImpl implements GamePlayService {
     //It means player1,2 can play gameId X and another player1,2 can play gameId Y
     private final Cache<String, BattleshipGame> battleshipGameCache;
 
-    private final BoardService boardService;
     private final ValidatorService validatorService;
 
-    public GamePlayServiceImpl(BoardService boardService, ValidatorService validatorService, Cache<String, BattleshipGame> battleshipGameCache) {
-        this.boardService = boardService;
+    public GamePlayServiceImpl(ValidatorService validatorService, Cache<String, BattleshipGame> battleshipGameCache) {
         this.validatorService = validatorService;
         this.battleshipGameCache = battleshipGameCache;
     }
@@ -137,15 +135,6 @@ public class GamePlayServiceImpl implements GamePlayService {
 
     private void placeShipOnBoard(Cell[][] cells, Ship ship) {
         ship.getCoordinates().forEach(coordinate -> cells[coordinate.getRow()][coordinate.getColumn()] = new Cell(ship.type().id()));
-    }
-
-    //    Used for visualizing view of the fleet on board
-    public void printBoard(String gameId, int playerId) {
-        var game = battleshipGameCache.getIfPresent(gameId);
-        var playerOptional = Objects.requireNonNull(game).playerById(playerId);
-        if (playerOptional.isPresent()) {
-            boardService.printBoard(playerOptional.get());
-        } else log.error("#Player id is not present! player: " + playerId);
     }
 
 }

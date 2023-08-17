@@ -36,5 +36,4 @@ public interface GamePlayService {
      */
     String fire(String gameId, int playerId, String label);
 
-    void printBoard(String gameId, int playerId);
 }

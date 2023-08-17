@@ -53,7 +53,9 @@ class BattleshipGameControllerImplTest {
     void shouldCreateNewGame_whenCreateNewGameIsCalled() throws Exception {
         mockMvc
                 .perform(post(API_URL).header("Authorization", BASIC_AUTH_PALYER1))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.game_id").isNotEmpty());
+
     }
  @Test
     void shouldReturnError_whenCreateNewGameIsCalledWithoutBasicAuthentication() throws Exception {
@@ -106,7 +108,8 @@ class BattleshipGameControllerImplTest {
                         .contentType(MediaType.TEXT_PLAIN)
                         .content("A1")
                 )
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.result").isNotEmpty());
     }
 
     /**
@@ -150,7 +153,7 @@ class BattleshipGameControllerImplTest {
                 .perform(post(API_URL + "/{game-id}/place", gameId)
                         .header("Authorization", BASIC_AUTH_PALYER1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new Gson().toJson(fleet1))
+                        .content(GSON.toJson(fleet1))
                 )
                 .andExpect(status().is(ErrorCode.NOT_YOUR_TURN_ERROR.httpStatus().value()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").exists())
@@ -173,7 +176,7 @@ class BattleshipGameControllerImplTest {
                 .perform(post(API_URL + "/{game-id}/place", gameId)
                         .header("Authorization", BASIC_AUTH_PALYER1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new Gson().toJson(fleet1))
+                        .content(GSON.toJson(fleet1))
                 )
                 .andExpect(status().is(ErrorCode.OUT_OF_BOARD_ERROR.httpStatus().value()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").exists())
@@ -181,12 +184,35 @@ class BattleshipGameControllerImplTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").value(ErrorCode.OUT_OF_BOARD_ERROR.code()));
     }
 
+    @Test
+    void shouldThrowException_whenNotHandleErrorRised() throws Exception {
+
+        var gameId = createNewGame();
+
+        joinGame(gameId);
+
+        List<ShipDto> fleet1 = generateFleet1();
+
+        placeShip(gameId, fleet1);
+
+        mockMvc
+                .perform(post(API_URL + "/{game-id}/fire", gameId)
+                        .header("Authorization", BASIC_AUTH_PALYER1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(GSON.toJson(fleet1)).content("")
+                )
+                .andExpect(status().is(ErrorCode.UNDANLDED_EXCEPTION_ERROR.httpStatus().value()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").value(ErrorCode.UNDANLDED_EXCEPTION_ERROR.code()));
+
+    }
+
     private void placeShip(String gameId, List<ShipDto> fleet1) throws Exception {
         mockMvc
                 .perform(post(API_URL + "/{game-id}/place", gameId)
                         .header("Authorization", BASIC_AUTH_PALYER1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new Gson().toJson(fleet1))
+                        .content(GSON.toJson(fleet1))
                 )
                 .andExpect(status().isOk());
 
@@ -194,7 +220,7 @@ class BattleshipGameControllerImplTest {
                 .perform(post(API_URL + "/{game-id}/place", gameId)
                         .header("Authorization", BASIC_AUTH_PALYER2)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new Gson().toJson(fleet1))
+                        .content(GSON.toJson(fleet1))
                 )
                 .andExpect(status().isOk());
     }

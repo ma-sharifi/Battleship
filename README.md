@@ -54,50 +54,174 @@ Implemented GamePlayService for handling gameplay. I defined the following metho
 3. placeFleet: It places ships on board based on 3 fields of shipDto.
 4. fire: The player guesses the location of the opponent's ship, then shoots it by presenting a label like A1. If the player guessed the correct ship coordinate, it will get Hit otherwise it will get Miss.
 
+###You can test this project 4 different ways:
+1. Swagger. `http://localhost:8080/swagger-ui/index.html`
+2. Run test `mvn test`
+3. Postman. There is a Postman file of this project in this path located in `/documentation/Battleship.postman_collection.json`
+4. CLI. Commands provided with HTTPie.
+
 ## API
 APIs implemented are correlated with GameplayServices. It implemented the same method as the service.
 All responses are provided by JSON in order to client read them uniformly. Results will be added to the payload field of errorMessageDto.
-You can find the Postman file in /documentation folder of the project.
 A player will extract from Basic authentication and will pass it to the service;
 I used POST because all these methods must change the state of the game.
 
-### errorMessageDto
-For response we can use Zalando problems that implemented rfc7807 `Problem Details for HTTP APIs`. But for the sake of simplicity, I used a simple Dto.
-* error_code: is low-level error code. error_code=0 means success, otherwise means error. As a third party you can override it and use it for internal custom messaging. On another hand, you can change the message of error code 1 to every message you want.
+### ErrorMessageDto
+For response, we can use Zalando problems that implemented rfc7807 `Problem Details for HTTP APIs`. But for the sake of simplicity, I used a simple Dto.
+* error_code: is a low-level error code. As a third party, you can override it and use it for internal custom messaging. On the other hand, you can change the message of error code 1 to every message you want.
 * If you are using this API as a client app, you can show this message to your customer.
-* Based on API call, you will get different field as a result. 
-### API explain
+* Based on the API call, you will get a different field as a result.
+
+### API explaination
 >Root of our API is:  `/v1/battleship`
-1. `/`: for creating a game. The response will be:
+
+If use face an error the response ill be like as follows:
+```bash
+   http post :8080/v1/battleship
+```
+* If you don't provide Authorization header you will face the following response.
+HTTP HEADERS:  
+```
+  HTTP/1.1 401
+  Connection: keep-alive
+  Content-Length: 70
+  Content-Type: application/json
+  Date: Thu, 17 Aug 2023 11:49:04 GMT
+  Keep-Alive: timeout=60
+```
+Body:   
 ```json
 {
-    "message": "Success",
-    "game_id": "CNG-c165b087-9015-4f22-bf43-34cc1757dcf7",
-    "error_code": 0
+  "error_code": 15,
+  "message": "Missing or invalid Authorization header!"
 }
 ```
-2. `/{game-id}/join`: for joining to game
-After successful join response will be:
 
-3. `/{game-id}/place`: for placing the fleet, request will be an array of shipDto.  
-* start: is the first coordinate of the ship. Since we have the length of the ship from its Type, and direction of that, we can calculate the other coordinates of a ship if we know the start coordinate of a ship.
-For example below, our ship will be place on board from A1 ,A2 ,A3 because the length of CRUISER is 3, its direction is HORIZONTAL, and start point is A1.
-* You should provide 5 different types of ships like follows.
+1.  Firs step of game play is creating a game.
+* **POST**`/`
+Request:
+```bash
+http POST :8080/v1/battleship 'Authorization:Basic cGxheWVyMTpwYXNzd29yZA=='  
+```
+The response will be:
 ```json
-[{
-    "shipType": "CRUISER",
+{
+    "game_id": "CNG-24d11904-89e3-41a1-93f6-8f3b407d7085"
+}
+```
+
+2. The second step is joining to the game:
+* **POST**`/{game-id}/join`
+For joining player1 you must run the following command:
+```bash
+http POST :8080/v1/battleship/CNG-24d11904-89e3-41a1-93f6-8f3b407d7085/join 'Authorization:Basic cGxheWVyMTpwYXNzd29yZA=='
+```
+And for joining player 2 you must run the following command:
+```bash
+http POST :8080/v1/battleship/CNG-24d11904-89e3-41a1-93f6-8f3b407d7085/join 'Authorization:Basic cGxheWVyMjpwYXNzd29yZA=='
+```
+
+After successful join response header will be as follows and the body is empty:
+```
+HTTP/1.1 200 
+Connection: keep-alive
+Content-Length: 0
+Date: Thu, 17 Aug 2023 12:37:29 GMT
+Keep-Alive: timeout=60
+```
+
+3. The third step is placing the fleet, request will be an array of shipDto.
+* **POST**`/{game-id}/place`
+*  start: is the first coordinate of the ship. Since we have the length of the ship from its Type, and direction of that, we can calculate the other coordinates of a ship if we know the start coordinate of a ship.
+For example below, our ship will be place on board from A1 ,A2 ,A3 because the length of CRUISER is 3, its direction is HORIZONTAL, and start point is A1.
+* You should provide 5 different types of ships.
+* Player1 request is as follows:
+```bash
+http POST :8080/v1/battleship/CNG-24d11904-89e3-41a1-93f6-8f3b407d7085/place 'Authorization:Basic cGxheWVyMTpwYXNzd29yZA=='  <<<'[{"type":"AIRCRAFT_CARRIER","direction":"HORIZONTAL","start":"A1"},{"type":"DESTROYER","direction":"HORIZONTAL","start":"B1"},{"type":"CRUISER","direction":"HORIZONTAL","start":"C1"},{"type":"BATTLESHIP","direction":"HORIZONTAL","start":"D1"},{"type":"SUBMARINE","direction":"HORIZONTAL","start":"E1"}]'
+```
+Player2 request:
+```bash
+http POST :8080/v1/battleship/CNG-24d11904-89e3-41a1-93f6-8f3b407d7085/place 'Authorization:Basic cGxheWVyMjpwYXNzd29yZA=='  <<<'[{"type":"AIRCRAFT_CARRIER","direction":"HORIZONTAL","start":"A1"},{"type":"DESTROYER","direction":"HORIZONTAL","start":"B1"},{"type":"CRUISER","direction":"HORIZONTAL","start":"C1"},{"type":"BATTLESHIP","direction":"HORIZONTAL","start":"D1"},{"type":"SUBMARINE","direction":"HORIZONTAL","start":"E1"}]'
+```
+The request body is like below:
+```json
+[
+  {
+    "type": "AIRCRAFT_CARRIER",
     "direction": "HORIZONTAL",
     "start": "A1"
-}]
+  },
+  {
+    "type": "DESTROYER",
+    "direction": "HORIZONTAL",
+    "start": "B1"
+  },
+  {
+    "type": "CRUISER",
+    "direction": "HORIZONTAL",
+    "start": "C1"
+  },
+  {
+    "type": "BATTLESHIP",
+    "direction": "HORIZONTAL",
+    "start": "D1"
+  },
+  {
+    "type": "SUBMARINE",
+    "direction": "HORIZONTAL",
+    "start": "E1"
+  }
+]
 ```
-4. `/{game-id}/fire`: for shooting the opponent's ship. 
+Response will be like follows without body:
+```
+HTTP/1.1 200 
+Connection: keep-alive
+Content-Length: 0
+Date: Thu, 17 Aug 2023 12:45:20 GMT
+Keep-Alive: timeout=60
+```
+3. The forth step is shooting the opponent's ship.
+* **POST**`/{game-id}/fire`
 * Request is a simple text/plain body such as : A10, B1, F9.
 * Response has a 'result' filed ,it holds the result of fire. As gameplay implies it can be Hit, Miss, Sunk, and Winner is: Player1/2: 
+
+```bash
+printf 'A1'| http  --follow --timeout 3600 POST 'http://localhost:8080/v1/battleship/CNG-24d11904-89e3-41a1-93f6-8f3b407d7085/fire' \
+ Authorization:'Basic cGxheWVyMTpwYXNzd29yZA==' \
+ Content-Type:'text/plain'
+```
+Http header response:
+```
+HTTP/1.1 200 
+Connection: keep-alive
+Content-Type: application/json
+Date: Thu, 17 Aug 2023 13:37:13 GMT
+Keep-Alive: timeout=60
+Transfer-Encoding: chunked
+```
+Response body will be:
 ```json 
    {
    "result": "Hit"
    }
 ``` 
+
+For Errors, header is as follows:
+```
+HTTP/1.1 400
+Connection: close
+Content-Type: application/json
+Date: Thu, 17 Aug 2023 12:49:06 GMT
+Transfer-Encoding: chunked
+```
+Body
+```json
+{
+"error_code": 16,
+"message": "Expected method call is: fire,and real method called is: placeFleet"
+}
+```
 
 ## Swagger
 You also can find the swagger ui in the following link:
@@ -232,8 +356,8 @@ Check your fleet for overlapped ships`
 
 ### Test Coverage
 * 100% Class
-* 97% Method
-* 97% Line
+* 95% Method
+* 96% Line
 
 ## How to improve
 * Use Redis instead of Caffeine.
