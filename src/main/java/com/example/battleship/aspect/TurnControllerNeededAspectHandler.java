@@ -10,6 +10,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 /**
  * @author Mahdi Sharifi
  * It handles the player's turn, and after successful action, it will change the turn.
@@ -30,10 +32,9 @@ public class TurnControllerNeededAspectHandler {
         Object[] args = joinPoint.getArgs();
         var gameId = (String) args[0];
         int playerId = (int) args[1];
+        var battleshipGame = battleshipGameCache.getIfPresent(gameId); //It is not null since it is always executed after the GameIdNeedeAspectHandler aspect.
 
-        var battleshipGame = battleshipGameCache.getIfPresent(gameId);
-
-        if (battleshipGame.getTurn() != playerId) {
+        if (Objects.requireNonNull(battleshipGame).getTurn()!=playerId) {
             throw new NotYourTurnException(String.valueOf(battleshipGame.getTurn()));
         }
 

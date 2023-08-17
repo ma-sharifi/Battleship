@@ -1,7 +1,7 @@
 package com.example.battleship.model;
 
 import com.example.battleship.model.ship.Ship;
-import lombok.Getter;
+import lombok.EqualsAndHashCode;
 import lombok.Setter;
 
 import java.util.HashMap;
@@ -11,7 +11,7 @@ import java.util.Map;
  * @author Mahdi Sharifi
  * The player is the owner of his fleet and his board.
  */
-@Getter @Setter
+ @Setter @EqualsAndHashCode
 public class Player {
     private int id; // 1 OR 2 . we have 2 player. player number 1 and player number 2
     private static final int BOARD_HEIGHT = 10;
@@ -21,6 +21,18 @@ public class Player {
     private Player opponent; //who is player's opponent
     //Players keep track of their guesses and the hits or misses.
     private Cell[][] board = new Cell[BOARD_HEIGHT][BOARD_WIDTH]; // Player's field. Without players, the field does not have a concept.
+
+    public Cell[][] getBoard() {
+        return board;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getNextAction() {
+        return nextAction;
+    }
 
     public void placeShip(Ship ship) {
         fleet.put(ship.type().id(), ship);

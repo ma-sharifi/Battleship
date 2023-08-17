@@ -1,4 +1,4 @@
-package com.example.battleship;
+package com.example.battleship.util;
 
 import com.example.battleship.controller.dto.ShipDto;
 import com.example.battleship.model.Coordinate;

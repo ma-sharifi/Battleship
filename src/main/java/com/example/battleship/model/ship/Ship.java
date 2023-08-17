@@ -29,9 +29,6 @@ public abstract class Ship {
         }
     }
 
-    public void setId(Character id) {//Do nothing, it provide automatically by irst character of shipType
-    }
-
     public boolean isShot(Coordinate coordinate) { //The result of shot is hit
         return coordinates.stream().filter(coordinate::isSameLocation).anyMatch(Coordinate::isHit);
     }
@@ -48,13 +45,4 @@ public abstract class Ship {
         return type;
     }
 
-    @Override
-    public String toString() {
-        return "Ship{" +
-                "id=" + id +
-//                ", direction=" + direction +
-//                ", shipType=" + type +
-//                ", coordinates=" + coordinates +
-                '}';
-    }
 }

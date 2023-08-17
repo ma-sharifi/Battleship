@@ -1,7 +1,5 @@
 package com.example.battleship.model.ship;
 
-import com.example.battleship.exception.ShipDoesNotExistException;
-
 /**
  * @author Mahdi Sharifi
  * Represent the type of ship and create an instance of ship based on our type of ship.
@@ -56,6 +54,6 @@ public enum ShipType implements ShipCreator {
             if(type.id().equals(shipId))
                 return type;
         }
-        throw new ShipDoesNotExistException(shipId+"");
+        return ShipType.BATTLESHIP;
     }
 }

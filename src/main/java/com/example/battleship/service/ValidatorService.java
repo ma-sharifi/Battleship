@@ -4,6 +4,7 @@ import com.example.battleship.exception.DuplicateShipException;
 import com.example.battleship.exception.OutOfBoardException;
 import com.example.battleship.exception.ViolateNumberOfShipException;
 import com.example.battleship.exception.ViolateOverlapException;
+import com.example.battleship.exception.errorcode.ErrorCode;
 import com.example.battleship.model.Coordinate;
 import com.example.battleship.model.ship.Ship;
 import com.example.battleship.model.ship.ShipType;
@@ -31,7 +32,6 @@ public class ValidatorService {
         shipIsOutOfGrid(fleet);
         checkShipOverlap(fleet);
     }
-
 
     /**
      * It checks if we have more than one type of ships in our fleet.
@@ -70,10 +70,9 @@ public class ValidatorService {
         for (Ship ship : fleet) {
             boolean isOutOfGrid = ship.getCoordinates().stream().anyMatch(this::coordinateIsOutOfBoard);
             if (isOutOfGrid) {
-                throw new OutOfBoardException(ship.type().name());
+                throw new OutOfBoardException("Ship is out of board bound! Ship type: "+ship.type().name(), ErrorCode.OUT_OF_BOARD_ERROR);
             }
         }
-
     }
 
     /**
@@ -89,14 +88,14 @@ public class ValidatorService {
                 .filter(entry -> entry.getValue() > 1)//Find duplicate coordinate
                 .map(Map.Entry::getKey).toList();// map to List of Coordinates
 
-        if (duplicatedLabels.size() > 0) { // ships overlapped? Create an understandable message for a client
+        if (!duplicatedLabels.isEmpty()) { // ships overlapped? Create an understandable message for a client
             var message = new StringBuilder();
             for (Ship ship : fleet) {
                 List<String> common = ship.getCoordinates().stream()
                         .filter(duplicatedLabels::contains)// find labeled in common with duplicatedLabels list
                         .map(Coordinate::toLabel)//to label
                         .toList();
-                if (common.size() > 0)
+                if (!common.isEmpty())
                     message.append("\nShip '").append(ShipType.getTypeByShipId(ship.getId())).append("' is ").append(ship.getDirection())
                             .append(" ,overlapped coordinates found: ").append(common);
             }

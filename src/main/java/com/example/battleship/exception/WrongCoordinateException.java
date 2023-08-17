@@ -1,6 +1,6 @@
 package com.example.battleship.exception;
 
-import org.springframework.http.HttpStatus;
+import com.example.battleship.exception.errorcode.ErrorCode;
 
 /**
  * @author Mahdi Sharifi
@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 public class WrongCoordinateException extends BaseException {
 
     public WrongCoordinateException(String coordinate) {
-        super(String.format("Coordinate is wrong: %s", coordinate),12, HttpStatus.BAD_REQUEST);
+        super("Coordinate is wrong: "+ coordinate, ErrorCode.WRONG_COORDINATE_ERROR);
     }
 
 }

@@ -3,11 +3,16 @@ package com.example.battleship.controller;
 import com.example.battleship.BattleshipApplication;
 import com.example.battleship.controller.dto.GameDto;
 import com.example.battleship.controller.dto.ShipDto;
+import com.example.battleship.exception.NotYourTurnException;
+import com.example.battleship.exception.OutOfBoardException;
+import com.example.battleship.exception.errorcode.ErrorCode;
 import com.example.battleship.model.ship.Direction;
 import com.example.battleship.model.ship.ShipType;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.swagger.v3.oas.models.links.Link;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -54,7 +60,7 @@ class BattleshipGameControllerImplTest {
         mockMvc
                 .perform(post(API_URL))
                 .andExpect(status().isUnauthorized())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").value(22));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").value(ErrorCode.USERNAME_OR_PASSWORD_NOT_MATCH.code()));
     }
 
     @Test
@@ -62,7 +68,7 @@ class BattleshipGameControllerImplTest {
         mockMvc
                 .perform(post(API_URL).header("Authorization", BASIC_AUTH_WRONG_PALYER))
                 .andExpect(status().isUnauthorized())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").value(22));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").value(ErrorCode.USERNAME_OR_PASSWORD_NOT_MATCH.code()));
     }
 
     @Test
@@ -103,6 +109,78 @@ class BattleshipGameControllerImplTest {
                 .andExpect(status().isOk());
     }
 
+    /**
+     * If gameplay is violated, we should get error.
+     */
+
+    @Test
+    void shouldThrowIllegalStateException_whenGamePlayViolated() throws Exception {
+
+        var gameId = createNewGame();
+
+        joinGame(gameId);
+
+        mockMvc
+                .perform(post(API_URL + "/{game-id}/fire", gameId)
+                        .header("Authorization", BASIC_AUTH_PALYER1)
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content("A1")
+                )
+                .andExpect(status().is(ErrorCode.GAMEPLAY_FLOW_VIOLATED.httpStatus().value()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").exists())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof IllegalStateException))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").value(ErrorCode.GAMEPLAY_FLOW_VIOLATED.code()));
+
+    }
+    @Test
+    void shouldThrowBaseException_whenNotYurTurnRised() throws Exception {
+
+        var gameId = createNewGame();
+
+        mockMvc
+                .perform(post(API_URL + "/{game-id}/join", gameId)
+                        .header("Authorization", BASIC_AUTH_PALYER1))
+                .andExpect(status().isOk());
+
+        LinkedList<ShipDto> fleet1 = generateFleet1();
+        fleet1.removeLast(); //remove the last shep a
+        fleet1.add(new ShipDto(ShipType.AIRCRAFT_CARRIER, Direction.HORIZONTAL, "D11"));
+
+        mockMvc
+                .perform(post(API_URL + "/{game-id}/place", gameId)
+                        .header("Authorization", BASIC_AUTH_PALYER1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new Gson().toJson(fleet1))
+                )
+                .andExpect(status().is(ErrorCode.NOT_YOUR_TURN_ERROR.httpStatus().value()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").exists())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotYourTurnException))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").value(ErrorCode.NOT_YOUR_TURN_ERROR.code()));
+
+    }
+
+    @Test
+    void shouldThrowOutOfBoardException_whenShipIsOutOfABourdCoordination() throws Exception {
+        var gameId = createNewGame();
+
+        joinGame(gameId);
+
+        LinkedList<ShipDto> fleet1 = generateFleet1();
+        fleet1.removeLast(); //remove the last shep a
+        fleet1.add(new ShipDto(ShipType.AIRCRAFT_CARRIER, Direction.HORIZONTAL, "D11"));
+
+        mockMvc
+                .perform(post(API_URL + "/{game-id}/place", gameId)
+                        .header("Authorization", BASIC_AUTH_PALYER1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new Gson().toJson(fleet1))
+                )
+                .andExpect(status().is(ErrorCode.OUT_OF_BOARD_ERROR.httpStatus().value()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").exists())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof OutOfBoardException))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").value(ErrorCode.OUT_OF_BOARD_ERROR.code()));
+    }
+
     private void placeShip(String gameId, List<ShipDto> fleet1) throws Exception {
         mockMvc
                 .perform(post(API_URL + "/{game-id}/place", gameId)
@@ -120,6 +198,8 @@ class BattleshipGameControllerImplTest {
                 )
                 .andExpect(status().isOk());
     }
+
+
 
     private void joinGame(String gameId) throws Exception {
         mockMvc
@@ -149,7 +229,7 @@ class BattleshipGameControllerImplTest {
                         .header("Authorization", BASIC_AUTH_PALYER1))
                 .andExpect(status().isCreated()).andReturn();
         GameDto responseDto = GSON.fromJson(result.getResponse().getContentAsString(),GameDto.class);
-        return responseDto.getGameId();
+        return responseDto.gameId();
     }
 
 }

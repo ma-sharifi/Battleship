@@ -1,10 +1,11 @@
 package com.example.battleship.model;
 
-import com.example.battleship.exception.JoinGameException;
+import com.example.battleship.exception.PlayerAlreadyJoinedException;
 import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Mahdi Sharifi
@@ -12,29 +13,44 @@ import java.util.List;
 @Data
 public class BattleshipGame {
     private String id;
-    private List<Player> players=new ArrayList<>(); //we can easily switch between players without witch case.
+    private List<Player> players = new ArrayList<>(); //we can easily switch between players without switch case.
     private int turn;
     private Player winner;
 
-    public Player playerById(int playerId) {
-        if (playerId<=players.size() && playerId >0)
-            return players.get(playerId-1);
-        return null;
+    public Optional<Player> playerById(int playerId) {
+        if (playerId <= players.size())
+            return Optional.of(players.get(playerId - 1));
+        return Optional.empty();
     }
 
-    public void setPlayerById(int playerId,Player player) {
-        if(playerById(playerId)==null)
-            players.add(playerId-1,player);
-        else
-            throw new JoinGameException(String.valueOf(playerId));
+    public void setPlayers(int playerId) {
+        if (playerById(playerId).isEmpty()) {
+            var player = new Player(playerId);
+            players.add(playerId - 1, player);
+            setPlayerOpponent(player);
+        } else
+            throw new PlayerAlreadyJoinedException(String.valueOf(playerId));
+    }
+
+    /**
+     * Player2 is already joined (Player1 joined after player2). The player2 is player1 opponent.
+     */
+    private void setPlayerOpponent(Player player) {
+        int opponentId= (player.getId() % 2) + 1; //find opponent id and set it as player's opponent
+        Optional<Player> opponentOptional = playerById(opponentId);
+        if (opponentOptional.isPresent()) {
+            Player opponent = opponentOptional.get();
+            player.setOpponent(opponent);//Set player2 as opponent of player1
+            opponent.setOpponent(player);//Set player1 as opponent of player2
+        }
     }
 
     public void setWinner(Player winner) {
         this.winner = winner;
     }
 
-    public boolean isFinished(){
-        return winner!=null;
+    public boolean isFinished() {
+        return winner != null;
     }
 
     /**
@@ -54,7 +70,4 @@ public class BattleshipGame {
         turn = ((turn % 2) + 1);
     }
 
-    public boolean isPlayerTurn(int playerId) {
-        return getTurn() == playerId;
-    }
 }

@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  */
 
 @Data
-public class Coordinate implements Comparable<Coordinate> {
+public class Coordinate  {
 
     private int row;
     private int column;
@@ -41,6 +41,7 @@ public class Coordinate implements Comparable<Coordinate> {
 
     /**
      * Convert label A1 to Coordinate(0,0)
+     * Convert label B10 to Coordinate(1,9)
      */
     public static Coordinate fromLabel(String label) {//A1->(0,0)
         Pattern pattern = Pattern.compile("^([A-Z])(\\d+)$");
@@ -58,9 +59,4 @@ public class Coordinate implements Comparable<Coordinate> {
         return new Coordinate(rowIndex, columnIndex);
     }
 
-    @Override
-    public int compareTo(Coordinate otherCoordinate) {
-        if(row==otherCoordinate.getRow() && column==otherCoordinate.column) return 0;
-        return Integer.compare(row,otherCoordinate.row);
-    }
 }

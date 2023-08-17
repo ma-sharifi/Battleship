@@ -1,6 +1,7 @@
 package com.example.battleship.controller.filter;
 
-import com.example.battleship.controller.dto.ResponseDto;
+import com.example.battleship.controller.dto.ErrorMessageDto;
+import com.example.battleship.exception.errorcode.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
@@ -73,9 +73,7 @@ public class BasicAuthenticationFilter implements Filter {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         OutputStream responseStream = response.getOutputStream();
         var mapper = new ObjectMapper();
-        var responseDto = new ResponseDto();
-        responseDto.setMessage( message);
-        responseDto.setErrorCode(22);
+        var responseDto = new ErrorMessageDto(ErrorCode.USERNAME_OR_PASSWORD_NOT_MATCH.code(), message);
         mapper.writeValue(responseStream, responseDto);
         responseStream.flush();
     }

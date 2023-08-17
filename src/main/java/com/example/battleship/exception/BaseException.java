@@ -1,8 +1,8 @@
 package com.example.battleship.exception;
 
+import com.example.battleship.exception.errorcode.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 /**
  * @author Mahdi Sharifi
@@ -10,11 +10,13 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 @Getter
 public class BaseException extends RuntimeException{
-    private final int errorCode;
-    private final HttpStatus httpStatus; // NOT_FOUND , OK
-    public BaseException(String message, int errorCode, HttpStatus httpStatus) {
+    private final ErrorCode errorCode;
+    public BaseException(String message,ErrorCode errorCode) {
         super(message);
         this.errorCode = errorCode;
-        this.httpStatus = httpStatus;
+    }
+
+    public ErrorCode errorCode() {
+        return errorCode;
     }
 }

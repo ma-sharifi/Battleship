@@ -1,12 +1,18 @@
 package com.example.battleship.exception;
 
-import org.springframework.http.HttpStatus;
+import com.example.battleship.exception.errorcode.ErrorCode;
 
 /**
  * @author Mahdi Sharifi
  */
-public class OutOfBoardException extends BaseException{
-    public OutOfBoardException(String shipType) {
-        super("Ship is out of board bound! Ship type: "+shipType,7,HttpStatus.BAD_REQUEST);
+public class OutOfBoardException extends IndexOutOfBoundsException{
+    private final ErrorCode errorCode;
+    public OutOfBoardException(String message,ErrorCode errorCode) {
+        super(message);
+        this.errorCode = errorCode;
+    }
+
+    public ErrorCode errorCode() {
+        return errorCode;
     }
 }

@@ -1,12 +1,13 @@
 package com.example.battleship.exception;
 
-import org.springframework.http.HttpStatus;
+import com.example.battleship.exception.errorcode.ErrorCode;
 
 /**
  * @author Mahdi Sharifi
  */
+
 public class DuplicateFireException extends BaseException{
     public DuplicateFireException(String label) {
-        super("You already fired this cell: "+label, 1, HttpStatus.BAD_REQUEST);
+        super("You already fired this cell: "+label, ErrorCode.DUPLICATE_FIRE_ERROR);
     }
 }

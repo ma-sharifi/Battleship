@@ -1,12 +1,12 @@
 package com.example.battleship.service;
 
-import com.example.battleship.Util;
 import com.example.battleship.controller.dto.ShipDto;
 import com.example.battleship.exception.*;
 import com.example.battleship.model.Coordinate;
 import com.example.battleship.model.ship.Direction;
 import com.example.battleship.model.ship.Ship;
 import com.example.battleship.model.ship.ShipType;
+import com.example.battleship.util.Util;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @see GamePlayServiceImpl
- *
+ * <p>
  * Every senario is tested here
  */
 
@@ -37,13 +37,12 @@ class GamePlayServiceTest {
         assertNotNull(battleshipGame);
     }
 
-
     @Test
     void shouldJoinGameException_whenPlayerDidnotJoinGamed() {
         var gameId = gamePlayService.createNewGame();
         List<ShipDto> fleet1 = generateFleet1();
 
-        PlayerDidNotJoinException thrown = Assertions.assertThrows(PlayerDidNotJoinException.class, () -> {
+        var thrown = Assertions.assertThrows(PlayerDidNotJoinException.class, () -> {
             gamePlayService.placeFleet(gameId, 1, fleet1);
 
         });
@@ -65,7 +64,6 @@ class GamePlayServiceTest {
 
         LinkedList<Ship> fleet = fleet2.stream().map(Util::shipDtoToShip).collect(Collectors.toCollection(LinkedList::new));
 
-        gamePlayService.printBoard(gameId, 1);
         int shipCounter = 0;
         for (Ship ship : fleet) {
             shipCounter++;
@@ -76,8 +74,7 @@ class GamePlayServiceTest {
             }
             if (shipCounter == fleet.size()) {
                 assertTrue(gamePlayService.fire(gameId, 1, ship.getCoordinates().getLast().toLabel()).startsWith("Winner is: "));
-            }
-            else {
+            } else {
                 assertEquals("Sunk", gamePlayService.fire(gameId, 1, ship.getCoordinates().getLast().toLabel()));
                 gamePlayService.fire(gameId, 2, ship.getCoordinates().getLast().toLabel());
             }
@@ -96,11 +93,29 @@ class GamePlayServiceTest {
         gamePlayService.joinGame(gameId, 1);
         gamePlayService.joinGame(gameId, 2);
 
-        ViolateGamePlayFlowException thrown = Assertions.assertThrows(ViolateGamePlayFlowException.class, () -> {
+        var thrown = Assertions.assertThrows(IllegalStateException.class, () -> {
             gamePlayService.fire(gameId, 1, "A1");
         });
 
         assertTrue(thrown.getMessage().startsWith("Expected method call is"));
+    }
+
+    /**
+     * If gameplay is violated, we should get error.
+     */
+    @Test
+    void shouldThrowPlayerAlreadyJoinedException_whenPlayerWantedToJoinAgain() {
+
+        var gameId = gamePlayService.createNewGame();
+
+        gamePlayService.joinGame(gameId, 1);
+        gamePlayService.joinGame(gameId, 2);
+
+        var thrown = Assertions.assertThrows(PlayerAlreadyJoinedException.class, () -> {
+            gamePlayService.joinGame(gameId, 1);
+        });
+
+        assertTrue(thrown.getMessage().startsWith("Player already joined! Player"));
     }
 
     @Test
@@ -157,8 +172,6 @@ class GamePlayServiceTest {
         gamePlayService.placeFleet(gameId, 1, fleet1);
         gamePlayService.placeFleet(gameId, 2, fleet2);
 
-        gamePlayService.printBoard(gameId, 2);
-
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 10; j++) {
                 gamePlayService.fire(gameId, 1, new Coordinate(i, j).toLabel());
@@ -169,8 +182,6 @@ class GamePlayServiceTest {
         gamePlayService.fire(gameId, 2, "I1");
         gamePlayService.fire(gameId, 1, "I2");
         gamePlayService.fire(gameId, 2, "I2");
-        gamePlayService.printBoard(gameId, 1);
-        gamePlayService.printBoard(gameId, 2);
         assertTrue(gamePlayService.fire(gameId, 1, "I3").startsWith("Winner is: "));
 
     }
@@ -211,7 +222,6 @@ class GamePlayServiceTest {
         assertTrue(thrown.getMessage().startsWith("Winner is: Player"));
     }
 
-
     @Test
     void shouldThrowDuplicateShipException_whenDuplicatedShipAddedToFleet() {
         var gameId = gamePlayService.createNewGame();
@@ -248,10 +258,8 @@ class GamePlayServiceTest {
         var thrown = Assertions.assertThrows(GameNotCreatedYetException.class, () -> {
             gamePlayService.joinGame("gameId", 1);
         });
-
         assertTrue(thrown.getMessage().startsWith("Game not created yet or gameId is not correct!"));
     }
-
 
     @Test
     void shouldWrongCoordinateException_whenFirsIsCalleByWrongLabel() {
@@ -273,11 +281,10 @@ class GamePlayServiceTest {
         });
 
         assertTrue(thrown.getMessage().startsWith("Coordinate is wrong: "));
-
     }
 
     @Test
-    void shouldThrowOutOfBoardException_whenFirsIsCalledWithOutOfABourdCoordination() {
+    void shouldThrowOutOfBoardException_whenShipIsOutOfABourdCoordination() {
         var gameId = gamePlayService.createNewGame();
 
         gamePlayService.joinGame(gameId, 1);
@@ -291,10 +298,56 @@ class GamePlayServiceTest {
             gamePlayService.placeFleet(gameId, 1, fleet1);
 
         });
-
         assertTrue(thrown.getMessage().startsWith("Ship is out of board bound! Ship type: "));
     }
 
+    @Test
+    void shouldThrowOutOfBoardException_whenFirsIsCalledWithColumnOutOfABourdCoordination() {
+
+        var gameId = gamePlayService.createNewGame();
+
+        gamePlayService.joinGame(gameId, 1);
+        gamePlayService.joinGame(gameId, 2);
+
+        List<ShipDto> fleet1 = generateFleet1();
+
+        gamePlayService.placeFleet(gameId, 1, fleet1);
+
+        List<ShipDto> fleet2 = generateFleet2();
+
+        gamePlayService.placeFleet(gameId, 2, fleet2);
+
+        var thrown = Assertions.assertThrows(OutOfBoardException.class, () -> {
+            gamePlayService.fire(gameId, 1, "A11");
+
+        });
+
+        assertTrue(thrown.getMessage().startsWith("Fire coordinate is out of board bound! Label is:"));
+    }
+
+    @Test
+    void shouldThrowOutOfBoardException_whenFirsIsCalledWithRowOutOfABourdCoordination() {
+
+        var gameId = gamePlayService.createNewGame();
+
+        gamePlayService.joinGame(gameId, 1);
+        gamePlayService.joinGame(gameId, 2);
+
+        List<ShipDto> fleet1 = generateFleet1();
+
+        gamePlayService.placeFleet(gameId, 1, fleet1);
+
+        List<ShipDto> fleet2 = generateFleet2();
+
+        gamePlayService.placeFleet(gameId, 2, fleet2);
+
+        var thrown = Assertions.assertThrows(OutOfBoardException.class, () -> {
+            gamePlayService.fire(gameId, 1, "O1");
+
+        });
+
+        assertTrue(thrown.getMessage().startsWith("Fire coordinate is out of board bound! Label is:"));
+    }
 
     @Test
     void shouldThrowDuplicateShipException_whenOneShipUsed2Times() {
@@ -357,17 +410,17 @@ class GamePlayServiceTest {
     }
 
     /**
-          1 2 3 4 5 6 7 8 9 10
-        A A A A A A ~ ~ ~ ~ ~
-        B ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-        C ~ ~ B B B B ~ ~ ~ ~
-        D ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-        E ~ ~ ~ ~ S S S ~ ~ ~
-        F ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-        G ~ D D ~ ~ ~ ~ ~ ~ ~
-        H ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-        I C C C ~ ~ ~ ~ ~ ~ ~
-        J ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+     * 1 2 3 4 5 6 7 8 9 10
+     * A A A A A A ~ ~ ~ ~ ~
+     * B ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+     * C ~ ~ B B B B ~ ~ ~ ~
+     * D ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+     * E ~ ~ ~ ~ S S S ~ ~ ~
+     * F ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+     * G ~ D D ~ ~ ~ ~ ~ ~ ~
+     * H ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+     * I C C C ~ ~ ~ ~ ~ ~ ~
+     * J ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
      */
     private static List<ShipDto> generateFleet2() {
         List<ShipDto> fleet2 = new ArrayList<>();
@@ -380,17 +433,17 @@ class GamePlayServiceTest {
     }
 
     /**
-          1 2 3 4 5 6 7 8 9 10
-        A D D ~ ~ ~ ~ ~ ~ ~ ~
-        B ~ ~ ~ ~ ~ ~ C C C ~
-        C ~ ~ B ~ ~ ~ ~ ~ ~ ~
-        D ~ ~ B ~ S ~ ~ ~ ~ ~
-        E ~ ~ B ~ S ~ ~ ~ ~ ~
-        F ~ ~ B ~ S ~ ~ ~ ~ ~
-        G ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-        H ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-        I ~ A A A A A ~ ~ ~ ~
-        J ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+     * 1 2 3 4 5 6 7 8 9 10
+     * A D D ~ ~ ~ ~ ~ ~ ~ ~
+     * B ~ ~ ~ ~ ~ ~ C C C ~
+     * C ~ ~ B ~ ~ ~ ~ ~ ~ ~
+     * D ~ ~ B ~ S ~ ~ ~ ~ ~
+     * E ~ ~ B ~ S ~ ~ ~ ~ ~
+     * F ~ ~ B ~ S ~ ~ ~ ~ ~
+     * G ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+     * H ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+     * I ~ A A A A A ~ ~ ~ ~
+     * J ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
      */
 
     private static LinkedList<ShipDto> generateFleet1() {
@@ -406,12 +459,13 @@ class GamePlayServiceTest {
     private static LinkedList<ShipDto> generateFleet3() {
         LinkedList<ShipDto> fleet = new LinkedList<>();
         fleet.add(new ShipDto(ShipType.DESTROYER, Direction.HORIZONTAL, "A1"));    //A1A2
-        fleet.add(new ShipDto(ShipType.CRUISER, Direction.HORIZONTAL, "B1"));      //A5A6A7
-        fleet.add(new ShipDto(ShipType.SUBMARINE, Direction.HORIZONTAL, "C1"));    //A3C2C3
+        fleet.add(new ShipDto(ShipType.CRUISER, Direction.HORIZONTAL, "B1"));
+        fleet.add(new ShipDto(ShipType.SUBMARINE, Direction.HORIZONTAL, "C1"));
         fleet.add(new ShipDto(ShipType.BATTLESHIP, Direction.HORIZONTAL, "D1"));
         fleet.add(new ShipDto(ShipType.AIRCRAFT_CARRIER, Direction.HORIZONTAL, "E1"));
         return fleet;
     }
+
     private static LinkedList<ShipDto> generateFleet4() {
         LinkedList<ShipDto> fleet = new LinkedList<>();
         fleet.add(new ShipDto(ShipType.DESTROYER, Direction.VERTICAL, "A1"));
@@ -430,18 +484,11 @@ class GamePlayServiceTest {
         gamePlayService.joinGame(gameId, 2);
 
         List<ShipDto> fleet1 = generateFleet3();
-        gamePlayService.printBoard(gameId, 1);
         List<ShipDto> fleet2 = generateFleet4();
-        gamePlayService.printBoard(gameId, 2);
 
         gamePlayService.placeFleet(gameId, 1, fleet1);
-        System.out.println("------- PLAYER1 -------------");
-        gamePlayService.printBoard(gameId, 1);
 
         gamePlayService.placeFleet(gameId, 2, fleet2);
-        System.out.println("------- PLAYER2 -------------");
-        gamePlayService.printBoard(gameId, 2);
-
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 10; j++) {
                 gamePlayService.fire(gameId, 1, new Coordinate(i, j).toLabel());
@@ -457,11 +504,7 @@ class GamePlayServiceTest {
         gamePlayService.fire(gameId, 1, "E4");
         gamePlayService.fire(gameId, 2, "E4");
 
-        assertTrue( gamePlayService.fire(gameId, 1, "E5").startsWith("Winner is: "));
-
-        gamePlayService.printBoard(gameId, 1);
-        System.out.println("------- PLAYER2 -------------");
-        gamePlayService.printBoard(gameId, 2);
+        assertTrue(gamePlayService.fire(gameId, 1, "E5").startsWith("Winner is: "));
 
     }
 }

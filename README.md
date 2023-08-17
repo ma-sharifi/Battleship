@@ -1,15 +1,13 @@
-## Battleship Game
-
-Notify Opponent about his turn
-
 # Battleship Game
-Battleship Game is an assessment for AA bank.
 
+## Battleship Game
+Battleship Game is an assessment for AA bank.
 
 ## Assumption
 1. We have 2 players. Player1 and Player2.
-2. There is no need to persist the state of each object.
-3. Simplicity is more important than other things.
+2. Player 1 is the first one to join the game.
+3. There is no need to persist the state of each object.
+4. Simplicity is more important than other things.
 
 ## Introduction
 The problem and its solution are explained.
@@ -33,7 +31,9 @@ by numbers and leTers (e.g., A1, B2, C3, etc.).
 3. Cruiser (3 cells)
 4. Submarine (3 cells)
 5. Destroyer (2 cells)
-* The ships can be placed either horizontally or vertically, but not diagonally. They should not overlap or touch each other.
+* The ships can be placed either horizontally or vertically, but not diagonally. They should not overlap or touch each other. Below is an example of a accepted placed fleet.
+ ![touch-ship](https://github.com/ma-sharifi/movieapi/assets/8404721/4f3f08b3-8355-451b-9c7b-36c93eecd5bb)
+
 
 ### Game Play
 1. Players take turns to try and guess the location of their opponent's ships by calling out a cell on the opponent's grid (e.g., A1, B2, etc.)
@@ -50,18 +50,18 @@ Used Java 17, Spring Boot 3, and Maven to implement this assignment.
 
 Implemented GamePlayService for handling gameplay. I defined the following method for it.
 1. createNewGame: Use for creating game. It will return a UUID as game id. After player creates the game, it must share the gameId with another player. 
-2. joinGame: Users must join the game then they can play. only 2 players (player1 and player2) can join the game. This method creates players and assigns their opponent;
-3. placeFleet: It placed ships on the board based on 3 fields of shipDto.
+2. joinGame: Players agreed on a game id. Users must join the game then they can play. only 2 players (player1 and player2) can join the game. This method creates players and assigns their opponent;
+3. placeFleet: It places ships on board based on 3 fields of shipDto.
 4. fire: The player guesses the location of the opponent's ship, then shoots it by presenting a label like A1. If the player guessed the correct ship coordinate, it will get Hit otherwise it will get Miss.
 
 ## API
 APIs implemented are correlated with GameplayServices. It implemented the same method as the service.
-All responses are provided by JSON in order to client read them uniformly. Results will be added to the payload field of responseDto.
+All responses are provided by JSON in order to client read them uniformly. Results will be added to the payload field of errorMessageDto.
 You can find the Postman file in /documentation folder of the project.
 A player will extract from Basic authentication and will pass it to the service;
 I used POST because all these methods must change the state of the game.
 
-### responseDto
+### errorMessageDto
 For response we can use Zalando problems that implemented rfc7807 `Problem Details for HTTP APIs`. But for the sake of simplicity, I used a simple Dto.
 * error_code: is low-level error code. error_code=0 means success, otherwise means error. As a third party you can override it and use it for internal custom messaging. On another hand, you can change the message of error code 1 to every message you want.
 * If you are using this API as a client app, you can show this message to your customer.
@@ -78,16 +78,11 @@ For response we can use Zalando problems that implemented rfc7807 `Problem Detai
 ```
 2. `/{game-id}/join`: for joining to game
 After successful join response will be:
-```json
-{
-    "message": "Success",
-    "error_code": 0
-}
-```
-3. `/{game-id}/place`: for placing the fleet
-Request will be an array of shipDto.
-start: is the first coordinate of the ship. Since we have the length of the ship from its Type, and direction of that, we can calculate the other coordinates of a ship if we know the start coordinate of a ship.
-For example below, our ship will be place on board from A1 ,A2 ,A3 because length o CRUISER is 3, its direction is HORIZONTAL, and start point is A1.
+
+3. `/{game-id}/place`: for placing the fleet, request will be an array of shipDto.  
+* start: is the first coordinate of the ship. Since we have the length of the ship from its Type, and direction of that, we can calculate the other coordinates of a ship if we know the start coordinate of a ship.
+For example below, our ship will be place on board from A1 ,A2 ,A3 because the length of CRUISER is 3, its direction is HORIZONTAL, and start point is A1.
+* You should provide 5 different types of ships like follows.
 ```json
 [{
     "shipType": "CRUISER",
@@ -96,16 +91,16 @@ For example below, our ship will be place on board from A1 ,A2 ,A3 because lengt
 }]
 ```
 4. `/{game-id}/fire`: for shooting the opponent's ship. 
-Response is: 
+* Request is a simple text/plain body such as : A10, B1, F9.
+* Response has a 'result' filed ,it holds the result of fire. As gameplay implies it can be Hit, Miss, Sunk, and Winner is: Player1/2: 
 ```json 
    {
-   "message": "Success",
-   "result": "Hit",
-   "error_code": 0
+   "result": "Hit"
    }
 ``` 
+
 ## Swagger
-You also can find the swagger ui in following link:
+You also can find the swagger ui in the following link:
 >http://localhost:8080/swagger-ui/index.html
 
 ## Security
@@ -113,7 +108,7 @@ For the sake of simplicity, I did not use Spring security for security, I just u
 AuthenticationFilter filter, extract the player id and add it to the request;
 If a user does not provide an authorization header he will get the following error.
 * Note: for test:
->username is player1 or player2 ,and password is password
+>username is player1 or player2, and password is password
 
 ```json
 {
@@ -197,7 +192,7 @@ For the sake of multi-player can use different games, I save the game after crea
 The key is game id and value is the game already created by player1 or player2.
 Player1 and player2 that have this game id can play this game.
 
-### Cross Cutting Concern
+### Cross-Cutting Concern
 I used aspects to control some concerns.
 For the sake of simplicity and readability, I extracted concerns from the methods and created an annotation for them to assign this concern to the relevant method.
 
@@ -235,18 +230,14 @@ Ship 'CRUISER' is HORIZONTAL ,overlapped coordinates found: [A1, A2, A3]
 Ship 'SUBMARINE' is HORIZONTAL ,overlapped coordinates found: [A3]  
 Check your fleet for overlapped ships`
 
-## Test
-1. Service test is complete and it covers every aspect of gameplay.
-2. Endpoint test is not completed it just tests the functionality of methods.
-
 ### Test Coverage
-* 97% Class
-* 91% Method
-* 94% Line
+* 100% Class
+* 97% Method
+* 97% Line
 
 ## How to improve
 * Use Redis instead of Caffeine.
 * Use a database for saving data.
 * Design and implement a beautiful UI for it
 * Use Keycloak or Spring security for security instead of a simple filter I implemented.
-* Use a way to notify opponent about gameID, like push notification, SMS, Kafka or Redis,...
+* Use a way to notify opponent about gameID and his turn, like push notification, SMS, Kafka or Redis,...

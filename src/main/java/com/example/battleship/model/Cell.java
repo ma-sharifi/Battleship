@@ -1,13 +1,14 @@
 package com.example.battleship.model;
 
 
-import lombok.Data;
+import lombok.Getter;
+
 /**
  * @author Mahdi Sharifi
  *
  * Our board is composed of matrix of cells.
  */
-@Data
+@Getter
 public class Cell {
 
     private Character shipId; // store the id of ship on board

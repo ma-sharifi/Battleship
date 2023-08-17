@@ -1,12 +1,12 @@
 package com.example.battleship.exception;
 
-import org.springframework.http.HttpStatus;
+import com.example.battleship.exception.errorcode.ErrorCode;
 
 /**
  * @author Mahdi Sharifi
  */
 public class ViolateOverlapException extends BaseException{
     public ViolateOverlapException(String message) {
-        super("Ships overlapped violated! "+message,10, HttpStatus.BAD_REQUEST);
+        super("Ships overlapped violated! "+message, ErrorCode.VIOLATE_OVERLAP_ERROR);
     }
 }
