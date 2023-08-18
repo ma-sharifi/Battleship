@@ -29,14 +29,6 @@ public abstract class Ship {
         }
     }
 
-    public boolean isShot(Coordinate coordinate) { //The result of shot is hit
-        return coordinates.stream().filter(coordinate::isSameLocation).anyMatch(Coordinate::isHit);
-    }
-
-    public boolean isShot(int row, int col) {
-        return isShot(new Coordinate(row, col));
-    }
-
     public boolean isSunk() {
         return coordinates.stream().allMatch(Coordinate::isHit);
     }

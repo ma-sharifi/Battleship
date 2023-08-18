@@ -2,6 +2,7 @@ package com.example.battleship.controller;
 
 import com.example.battleship.controller.dto.GameDto;
 import com.example.battleship.controller.dto.GameFireResultDto;
+import com.example.battleship.controller.dto.LabelDto;
 import com.example.battleship.controller.dto.ShipDto;
 import com.example.battleship.service.GamePlayService;
 import lombok.extern.slf4j.Slf4j;
@@ -51,9 +52,9 @@ public class BattleshipGameControllerImpl implements BattleshipGameController {
     }
 
     @Override
-    public ResponseEntity<GameFireResultDto> fire(String gameId, int playerId, String label) {
+    public ResponseEntity<GameFireResultDto> fire(String gameId, int playerId, LabelDto labelDto) {
         return ResponseEntity
-                .ok(new GameFireResultDto(gamePlayService.fire(gameId, playerId, label)));
+                .ok(new GameFireResultDto(gamePlayService.fire(gameId, playerId, labelDto.label())));
     }
 
 }

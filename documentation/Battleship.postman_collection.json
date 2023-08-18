@@ -60,7 +60,7 @@
 					"basic": [
 						{
 							"key": "username",
-							"value": "player2",
+							"value": "player1",
 							"type": "string"
 						},
 						{
@@ -106,7 +106,7 @@
 					"basic": [
 						{
 							"key": "username",
-							"value": "player1",
+							"value": "player2",
 							"type": "string"
 						},
 						{
@@ -152,7 +152,7 @@
 					"basic": [
 						{
 							"key": "username",
-							"value": "player1",
+							"value": "player2",
 							"type": "string"
 						},
 						{
@@ -166,10 +166,10 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "A1",
+					"raw": "{\"label\": \"A1\"}",
 					"options": {
 						"raw": {
-							"language": "text"
+							"language": "json"
 						}
 					}
 				},

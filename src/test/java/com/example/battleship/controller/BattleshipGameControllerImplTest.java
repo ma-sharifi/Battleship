@@ -2,6 +2,7 @@ package com.example.battleship.controller;
 
 import com.example.battleship.BattleshipApplication;
 import com.example.battleship.controller.dto.GameDto;
+import com.example.battleship.controller.dto.LabelDto;
 import com.example.battleship.controller.dto.ShipDto;
 import com.example.battleship.exception.NotYourTurnException;
 import com.example.battleship.exception.OutOfBoardException;
@@ -11,8 +12,6 @@ import com.example.battleship.model.ship.ShipType;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.swagger.v3.oas.models.links.Link;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -105,8 +104,8 @@ class BattleshipGameControllerImplTest {
         mockMvc
                 .perform(post(API_URL + "/{game-id}/fire", gameId)
                         .header("Authorization", BASIC_AUTH_PALYER1)
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .content("A1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(GSON.toJson(new LabelDto("A1")))
                 )
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.result").isNotEmpty());
@@ -126,8 +125,8 @@ class BattleshipGameControllerImplTest {
         mockMvc
                 .perform(post(API_URL + "/{game-id}/fire", gameId)
                         .header("Authorization", BASIC_AUTH_PALYER1)
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .content("A1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(GSON.toJson(new LabelDto("A1")))
                 )
                 .andExpect(status().is(ErrorCode.GAMEPLAY_FLOW_VIOLATED.httpStatus().value()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.error_code").exists())

@@ -2,6 +2,7 @@ package com.example.battleship.controller;
 
 import com.example.battleship.controller.dto.GameDto;
 import com.example.battleship.controller.dto.GameFireResultDto;
+import com.example.battleship.controller.dto.LabelDto;
 import com.example.battleship.controller.dto.ShipDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -58,12 +59,12 @@ public interface BattleshipGameController {
              @ApiResponse(responseCode = "200", description = "Fire to opponent board."),
              @ApiResponse(responseCode = "400", description = "Invalid Request. Any problem in client side will return this code.", content = @Content)})
      @Operation(summary = "Fire to opponent board")
-     @PostMapping(value ="/{game-id}/fire" , consumes = MediaType.TEXT_PLAIN_VALUE)
+     @PostMapping(value ="/{game-id}/fire" , consumes = MediaType.APPLICATION_JSON_VALUE)
      ResponseEntity<GameFireResultDto>  fire(
              @Parameter(description = "Game id refers to our game",example = "138fe277-1474-4da7-897c-aad88c6dbcf4")
              @Valid @PathVariable("game-id") String gameId,
              @Parameter(description = "Which player is going to join. We have 2 player. player1 and player1. '1' stands for player1 ",example = "1")
              @RequestAttribute("player-id") int playerId,
              @Parameter(description = "Coordination of ship on board", example = "A1")
-             @Valid @RequestBody String label);
+             @Valid @RequestBody LabelDto labelDto);
 }
