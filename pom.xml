@@ -17,8 +17,9 @@
 
     <properties>
         <java.version>17</java.version>
-        <openapi.version>2.2.0</openapi.version>
         <snakeyaml.version>2.1</snakeyaml.version>
+        <!-- For the sake of Reproducibility, Maintenance and Stability I set the version of libraries.-->
+        <openapi.version>2.2.0</openapi.version>
         <gson.version>2.10.1</gson.version>
         <caffeine.version>3.1.8</caffeine.version>
     </properties>

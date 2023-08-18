@@ -43,7 +43,7 @@ Each player has their own grid board. The grid typically consists of 10x10 cells
 
 ## Solution
 Created a standalone java application that allows **users** to play together this game.
-Used Java 17, Spring Boot 3, and Maven to implement this assignment. You can run the project which following bash.
+Used Java 17, Spring Boot 3, and Maven to implement this assignment. You can run the project with the following bash.
 ```shell
 mvn spring-boot:run
 ````
@@ -58,7 +58,7 @@ Implemented GamePlayService for handling gameplay. I defined the following metho
 You can test this project 4 different ways:
 1. Swagger. `http://localhost:8080/swagger-ui/index.html`
 2. Run test `mvn test`
-3. Postman. There is a Postman file of this project in this path located in `/documentation/Battleship.postman_collection.json`
+3. Postman. There is a Postman file of this project in this path located in `/documentation/Battleship.postman_collection.json`. After getting gameId, You must provide it as a value for "game-id" variable in the variables tab of Battleship collection then press the **SAVE** button. 
 4. CLI. Commands provided with HTTPie.
 
 ### Objects
@@ -110,7 +110,7 @@ A fleet is a group of ships.
 If all ships in the fleet sunk, it means the opponent is won.
 
 #### LabelDto
-It's a simple Dto with one field to hold label of fire location.
+It's a simple record Dto with one field to hold label of fire location.
 ```json
 {"label": "A1"}
 ```
@@ -157,9 +157,9 @@ For the sake of simplicity and readability, I extracted concerns from the method
 It handles the player's turn, and after successful action, it will change the turn.
 
 #### GameIdNeeded
-If a player does not present the game id they can't play the game. A game will be represented by a game id. 
+If a player does not present the game, id they can't play the game. A game will be represented by a game id. 
 This aspect handles this part.
-Because most of the methods need this validation, for the sake of simplicity I put it in aspect.
+Because most of the methods need this validation, for the sake of simplicity, maintainability and SOLID principal (Single responsibility), I put it in aspect.
 
 #### FlowControllerNeeded
 It controls the flow of the gameplay. The player can't call fire before joining the game. 
@@ -168,15 +168,14 @@ The player just can fire his opponent after placing his fleet on board.
 ### For the following reasons, I added the version of dependencies in pom
 1. *Reproducibility:* With specific versions defined, you ensure that anyone who works on the project or uses it can recreate the exact environment you intended, minimizing the chances of compatibility issues.
 2. *Stability:* Dependency versions can change over time, and newer versions might introduce breaking changes. By pinning the versions, you prevent unexpected updates that could lead to bugs or compatibility problems.
-3. *Control:* Explicitly stating the versions gives you control over which codebase you're using, which can be important when dealing with libraries that evolve rapidly.
-4. *Security:* Known vulnerabilities might exist in certain versions of dependencies. Explicitly specifying versions enables you to quickly identify and address potential security issues.
-5. *Maintenance:* Explicit version declarations make it easier to identify and update dependencies when necessary. This aids in keeping the project up to date and secure.
+3. *Security:* Known vulnerabilities might exist in certain versions of dependencies. Explicitly specifying versions enables you to quickly identify and address potential security issues.
+4. *Maintenance:* Explicit version declarations make it easier to identify and update dependencies when necessary. This aids in keeping the project up to date and secure.
 
 ## Exception
 Defined many of them to handle exceptional situations. Tried to explain why this exception happened with a useful message to how to solve this message.
 
 ### Example for ViolateOverlapException 
-if we placed our fleed like the following code, "A1" is the start point of a ship:
+If we placed our fleed like the following code, "A1" is the start point of a ship:
 ```java
   LinkedList<ShipDto> fleet= new LinkedList<>();
   fleet.add(new ShipDto(ShipType.DESTROYER, Direction.HORIZONTAL, "A1"));  
@@ -199,9 +198,13 @@ Check your fleet for overlapped ships
 ## API
 APIs implemented are correlated with GameplayServices. It implemented the same method as the service.
 All responses and request bodies are provided by JSON in order to client read and provide them uniformly. Results will be show in different fields.  
-A player will extract from Basic authentication and will pass it to the service;  
-I used POST because all these methods must change the state of the game.
-* Note: For running bashes, you should use HTTPie.
+A player will extract from Basic authentication and will pass it to the service.   
+I used POST because all these methods have to change the state of the game.  
+* Note: For running bashes, you should use HTTPie.  
+
+You can find the sequence diagram of fire method as follows.  
+![Sequence Diagram](https://github.com/ma-sharifi/Battleship/assets/8404721/ee3ad9e1-e4db-47bb-b555-1f6d0b58e849)
+
 
 ### ErrorMessageDto
 For response, we can use Zalando problems that implemented rfc7807 `Problem Details for HTTP APIs`. But for the sake of simplicity, I used a simple Dto.
@@ -389,8 +392,11 @@ If a user does not provide an authorization header he will get the following err
 
 ### Test Coverage
 * 100% Class
-* 95% Method
-* 96% Line
+* 97% Method
+* 97% Line
+
+### SonarLint
+All issues are solved.
 
 ## How to improve
 * Use Redis instead of Caffeine.
